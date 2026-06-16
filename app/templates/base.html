@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Our Trip — 함께하는 여행 기록 커뮤니티" />
+    <title>{% block title %}Our Trip{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Mrs+Saint+Delafield&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    {% block styles %}{% endblock %}
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    {% block header %}
+    <header class="site-header">
+      <nav class="site-nav container">
+        <a href="{{ url_for('main.index') }}" class="site-logo">Our Trip</a>
+        <button class="nav-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="site-nav__links">
+          <li><a href="{{ url_for('main.index') }}">홈</a></li>
+          <li><a href="{{ url_for('main.about') }}">소개</a></li>
+          <li><a href="{{ url_for('main.contact') }}">문의</a></li>
+          <li><a href="{{ url_for('profile.my_profile') }}">프로필</a></li>
+          {% if session.get('user_id') %}
+          <li><a href="{{ url_for('auth.logout') }}" class="site-nav__auth">로그아웃</a></li>
+          {% else %}
+          <li><a href="{{ url_for('auth.login') }}" class="site-nav__auth">로그인</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+    {% endblock %}
+
+    <main class="site-main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-wrap container">
+        {% for category, message in messages %}
+        <p class="flash flash--{{ category }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p class="site-footer__logo">Our Trip</p>
+        <p class="site-footer__copy">&copy; 2026 Our Trip. 함께하는 여행의 모든 순간.</p>
+        <div class="site-footer__links">
+          <a href="{{ url_for('main.index') }}">홈</a>
+          <a href="{{ url_for('main.about') }}">소개</a>
+          <a href="{{ url_for('main.contact') }}">문의</a>
+        </div>
+      </div>
+    </footer>
+    {% endblock %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

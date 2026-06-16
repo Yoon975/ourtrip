@@ -1,0 +1,447 @@
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+}
+
+.scrapbook {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem 6rem;
+  position: relative;
+}
+
+.scrapbook__lace {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 120px;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.55) 2px, transparent 3px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.45) 3px, transparent 4px),
+    radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.5) 2px, transparent 3px);
+  background-size: 24px 24px, 32px 32px, 20px 20px;
+  opacity: 0.7;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at top right, black 30%, transparent 75%);
+}
+
+.journal {
+  display: flex;
+  width: min(960px, 100%);
+  min-height: 620px;
+  background: var(--color-paper);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lifted);
+  position: relative;
+  background-image:
+    linear-gradient(90deg, transparent 49.5%, rgba(180, 170, 155, 0.25) 49.5%, rgba(180, 170, 155, 0.25) 50.5%, transparent 50.5%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(200, 190, 175, 0.08) 28px,
+      rgba(200, 190, 175, 0.08) 29px
+    );
+}
+
+.journal-spine {
+  width: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.06));
+}
+
+.journal-page {
+  flex: 1;
+  padding: 2.5rem 2rem;
+  position: relative;
+}
+
+.journal-page--left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Receipt stack */
+.receipt-stack {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  transform: rotate(-1.5deg);
+}
+
+.paperclip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 56px;
+  z-index: 10;
+  border: 3px solid #9aa5b1;
+  border-radius: 14px 14px 4px 4px;
+  border-bottom: none;
+  background: linear-gradient(135deg, #c8cdd3, #8a9299);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.paperclip::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 36px;
+  border: 3px solid #9aa5b1;
+  border-radius: 0 0 8px 8px;
+  background: transparent;
+}
+
+.id-photo {
+  position: absolute;
+  top: 12px;
+  right: -20px;
+  width: 110px;
+  height: 140px;
+  background: #fff;
+  padding: 6px;
+  box-shadow: var(--shadow-soft);
+  transform: rotate(3deg);
+  z-index: 5;
+  overflow: hidden;
+}
+
+.id-photo img,
+.id-photo__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.id-photo img {
+  filter: grayscale(100%) sepia(30%) hue-rotate(180deg) saturate(1.4);
+}
+
+.id-photo__placeholder {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--color-blue-light), var(--color-blue));
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--font-script);
+}
+
+.receipt {
+  width: 220px;
+  padding: 1.75rem 1.25rem 1.5rem;
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-receipt);
+  font-size: 0.68rem;
+  color: var(--color-receipt);
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.receipt__brand {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.25rem;
+}
+
+.receipt__meta {
+  text-align: center;
+  font-size: 0.55rem;
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.receipt__divider {
+  border-top: 1px dashed rgba(47, 79, 122, 0.35);
+  margin: 0.6rem 0;
+}
+
+.receipt__label {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.receipt__row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.receipt__dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(47, 79, 122, 0.4);
+  min-width: 20px;
+  margin-bottom: 2px;
+}
+
+.receipt__total {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+  margin-top: 0.25rem;
+}
+
+/* Contact card */
+.contact-card {
+  position: relative;
+  width: 240px;
+  margin: 0 auto 0 0;
+  padding: 1.5rem 1.25rem 1.25rem;
+  background: #fff;
+  border: 2px dashed var(--color-blue);
+  border-radius: 2px;
+  transform: rotate(-2deg);
+  box-shadow: var(--shadow-soft);
+  clip-path: polygon(
+    0% 4%, 4% 0%, 8% 3%, 12% 0%, 16% 4%, 20% 0%, 24% 3%, 28% 0%,
+    32% 4%, 36% 0%, 40% 3%, 44% 0%, 48% 4%, 52% 0%, 56% 3%, 60% 0%,
+    64% 4%, 68% 0%, 72% 3%, 76% 0%, 80% 4%, 84% 0%, 88% 3%, 92% 0%,
+    96% 4%, 100% 0%,
+    100% 96%, 96% 100%, 92% 97%, 88% 100%, 84% 96%, 80% 100%, 76% 97%, 72% 100%,
+    68% 96%, 64% 100%, 60% 97%, 56% 100%, 52% 96%, 48% 100%, 44% 97%, 40% 100%,
+    36% 96%, 32% 100%, 28% 97%, 24% 100%, 20% 96%, 16% 100%, 12% 97%, 8% 100%,
+    4% 96%, 0% 100%
+  );
+}
+
+.contact-card__tape {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 90px;
+  height: 28px;
+  background: var(--color-tape);
+  opacity: 0.85;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.contact-card__logo {
+  font-family: var(--font-script);
+  font-size: 2rem;
+  color: var(--color-blue);
+  text-align: center;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+.contact-card__list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-family: var(--font-receipt);
+  color: var(--color-receipt);
+  letter-spacing: 0.03em;
+  margin-bottom: 0.45rem;
+}
+
+.contact-card__dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(47, 79, 122, 0.35);
+  min-width: 12px;
+  margin-bottom: 2px;
+}
+
+/* Right page */
+.journal-page--right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.75rem;
+  text-align: center;
+}
+
+.journal-watermark {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(184, 204, 232, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.journal-section {
+  position: relative;
+  z-index: 1;
+}
+
+.journal-section__title {
+  font-family: var(--font-script);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 400;
+  color: var(--color-blue);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.journal-section__num {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  vertical-align: super;
+  margin-left: 0.15rem;
+  color: var(--color-blue-dark);
+  font-weight: 500;
+}
+
+.journal-section p {
+  font-size: 0.82rem;
+  line-height: 1.85;
+  color: var(--color-blue-dark);
+  font-weight: 400;
+}
+
+/* Toast bar */
+.profile-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: min(420px, calc(100% - 2rem));
+  padding: 0.75rem 1rem 0.75rem 0.875rem;
+  background: rgba(55, 55, 55, 0.92);
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.profile-toast.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+  pointer-events: none;
+}
+
+.profile-toast__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-toast__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-blue);
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.profile-toast__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-toast__info p {
+  font-size: 0.85rem;
+}
+
+.profile-toast__info strong {
+  font-weight: 600;
+}
+
+.profile-toast__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.profile-toast__btn {
+  padding: 0.5rem 1rem;
+  background: #fff;
+  color: #333;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.profile-toast__btn:hover {
+  background: #f0f0f0;
+}
+
+.profile-toast__close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.25rem;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.profile-toast__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .journal {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .journal-spine {
+    width: 100%;
+    height: 6px;
+  }
+
+  .journal-page {
+    padding: 2rem 1.25rem;
+  }
+
+  .receipt-stack {
+    margin: 0 auto;
+  }
+
+  .contact-card {
+    margin: 0 auto;
+  }
+
+  .id-photo {
+    right: -10px;
+    width: 90px;
+    height: 115px;
+  }
+
+  .profile-toast {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .profile-toast__actions {
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} — Our Trip{% endblock %}
+
+{% block content %}
+<article class="post-detail">
+  <div class="container">
+    <header class="post-detail__header paper-panel">
+      <div class="paper-panel__tape" aria-hidden="true"></div>
+      <span class="post-detail__tag">{{ post.location_country }}{% if post.location_city %} · {{ post.location_city }}{% endif %}</span>
+      <h1 class="post-detail__title">{{ post.title }}</h1>
+      <div class="post-detail__meta">
+        <a href="{{ url_for('profile.view_profile', user_id=post.user_id) }}">{{ post.nickname }}</a>
+        <span>·</span>
+        <span>조회 {{ post.view_count }}</span>
+        {% if post.travel_start_date %}
+        <span>·</span>
+        <span>{{ post.travel_start_date.strftime('%Y.%m.%d') }}{% if post.travel_end_date %} – {{ post.travel_end_date.strftime('%Y.%m.%d') }}{% endif %}</span>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if post.image_url %}
+    <figure class="post-detail__image">
+      <img src="{{ post.image_url }}" alt="{{ post.title }}" />
+    </figure>
+    {% endif %}
+
+    <div class="post-detail__content paper-panel">
+      <p>{{ post.content }}</p>
+    </div>
+
+    <section class="comments">
+      <h2 class="section-head__title">Comments<span class="section-head__num">(2)</span></h2>
+      <ul class="comment-list">
+        {% for comment in comments %}
+        <li class="comment-item">
+          <strong>{{ comment.nickname }}</strong>
+          <span class="comment-item__date">{{ comment.created_at.strftime('%Y.%m.%d') if comment.created_at else '' }}</span>
+          <p>{{ comment.content }}</p>
+        </li>
+        {% else %}
+        <li class="empty-msg">아직 댓글이 없습니다.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <div class="post-detail__actions">
+      <a href="{{ url_for('main.index') }}" class="btn btn--outline">목록으로</a>
+    </div>
+  </div>
+</article>
+{% endblock %}

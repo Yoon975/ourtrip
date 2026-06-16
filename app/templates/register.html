@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}회원가입 — Our Trip{% endblock %}
+{% block body_class %}page-register{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="lace-border" aria-hidden="true"></div>
+
+<div class="page-wrapper">
+  <div class="notebook">
+    <div class="page page-left">
+      <div class="receipt-wrap">
+        <div class="paperclip" aria-hidden="true"></div>
+        <div class="receipt">
+          <div class="receipt-title">MEMBER</div>
+          <hr class="receipt-divider" />
+          <div class="receipt-item">
+            <span>EMAIL</span>
+            <span class="dots"></span>
+            <span class="status" id="status-email" data-empty="required">required</span>
+          </div>
+          <div class="receipt-item">
+            <span>PW</span>
+            <span class="dots"></span>
+            <span class="status" id="status-pw" data-empty="required">required</span>
+          </div>
+          <div class="receipt-item">
+            <span>NICK</span>
+            <span class="dots"></span>
+            <span class="status" id="status-nick" data-empty="required">required</span>
+          </div>
+          <div class="receipt-item">
+            <span>BIRTH</span>
+            <span class="dots"></span>
+            <span class="status" id="status-birth" data-empty="optional">optional</span>
+          </div>
+          <hr class="receipt-divider" />
+          <p class="receipt-note">* 아래 카드에 정보를 입력하세요</p>
+        </div>
+      </div>
+
+      <label class="photo-pin" id="photoPin" for="profilePhoto">
+        <input type="file" id="profilePhoto" accept="image/*" />
+        <span class="photo-placeholder">👤</span>
+        <img class="photo-preview" id="photoPreview" alt="프로필 사진 미리보기" />
+      </label>
+
+      <form id="signupForm" class="sticker-card">
+        <div class="tape" aria-hidden="true"></div>
+        <div class="form-row">
+          <label for="u_id">EMAIL</label>
+          <input type="email" id="u_id" name="u_id" class="field-line" required autocomplete="username" />
+        </div>
+        <div class="form-row">
+          <label for="pw">PW</label>
+          <input type="password" id="pw" name="pw" class="field-line" required autocomplete="new-password" />
+        </div>
+        <div class="form-row">
+          <label for="nick">NICK</label>
+          <input type="text" id="nick" name="nick" class="field-line" required />
+        </div>
+        <div class="form-row">
+          <label for="birth_year">BIRTH</label>
+          <input type="number" id="birth_year" name="birth_year" class="field-line" placeholder="2000" min="1900" max="2026" />
+        </div>
+      </form>
+    </div>
+
+    <div class="page page-right">
+      <div class="watermark" aria-hidden="true"></div>
+      <h1 class="script-title">Sign Up</h1>
+      <p class="script-subtitle">나만의 여행 페이지에 오신 것을 환영합니다</p>
+
+      <h2 class="section-heading">Welcome</h2>
+      <ul class="info-list">
+        <li>이메일은 중복될 수 없습니다</li>
+        <li>비밀번호는 안전하게 보관하세요</li>
+        <li>닉네임으로 나를 표현해 보세요</li>
+        <li>출생년도는 선택 입력입니다</li>
+      </ul>
+
+      <h2 class="section-heading">Join Us</h2>
+      <button type="submit" form="signupForm" class="submit-btn" id="submitBtn">Sign Up ✎</button>
+      <div id="message" class="message" role="alert"></div>
+      <a href="{{ url_for('main.index') }}" class="back-link">← Back to Home</a>
+      <a href="{{ url_for('auth.login') }}" class="back-link">이미 계정이 있으신가요? 로그인</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.REGISTER_API_URL = "{{ url_for('auth.api_create_user') }}";
+  window.LOGIN_URL = "{{ url_for('auth.login') }}";
+</script>
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+{% endblock %}

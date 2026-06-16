@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}소개 — Our Trip{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="page-hero__label">ABOUT</p>
+    <h1 class="page-hero__title">Our Trip<span class="page-hero__num">(1)</span></h1>
+    <p class="page-hero__desc">함께하는 여행 기록 커뮤니티</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container about-grid">
+    <article class="paper-panel">
+      <div class="paper-panel__tape" aria-hidden="true"></div>
+      <h2 class="paper-panel__title">What we do<span class="paper-panel__num">(2)</span></h2>
+      <p>
+        Our Trip은 여행 경험을 게시글, 사진, 댓글, 스크랩으로 기록하고
+        공유하는 공간입니다. 국가·도시·여행 기간 정보를 함께 남겨
+        다른 여행자에게 참고가 되는 콘텐츠를 만듭니다.
+      </p>
+    </article>
+
+    <article class="paper-panel">
+      <div class="paper-panel__tape" aria-hidden="true"></div>
+      <h2 class="paper-panel__title">Features<span class="paper-panel__num">(3)</span></h2>
+      <ul class="feature-list">
+        <li>여행 게시글 작성 및 이미지 업로드</li>
+        <li>댓글 · 대댓글로 소통</li>
+        <li>마음에 드는 글 스크랩</li>
+        <li>스크랩북 스타일 프로필 페이지</li>
+      </ul>
+    </article>
+
+    <article class="paper-panel paper-panel--wide">
+      <div class="paper-panel__tape" aria-hidden="true"></div>
+      <h2 class="paper-panel__title">For travelers<span class="paper-panel__num">(4)</span></h2>
+      <p>
+        출발 전에는 일정과 팁을, 돌아온 후에는 후기와 사진을 정리하세요.
+        Our Trip은 개인의 여행 아카이브이자, 서로의 경험을 나누는
+        커뮤니티입니다.
+      </p>
+    </article>
+  </div>
+</section>
+{% endblock %}

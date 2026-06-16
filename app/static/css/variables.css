@@ -1,0 +1,26 @@
+:root {
+  --color-bg: #8ba0cc;
+  --color-paper: #f7f5f0;
+  --color-paper-shadow: #e8e4dc;
+  --color-blue: #4a6fa5;
+  --color-blue-dark: #2f4f7a;
+  --color-blue-light: #b8cce8;
+  --color-text: #3d5a80;
+  --color-text-muted: #5c7090;
+  --color-receipt: #2f4f7a;
+  --color-accent: #d4a373;
+  --color-tape: rgba(235, 210, 140, 0.75);
+
+  --font-script: "Mrs Saint Delafield", "Caveat", cursive;
+  --font-receipt: "Courier Prime", "Courier New", monospace;
+  --font-body: "Noto Sans KR", sans-serif;
+
+  --container-width: 1120px;
+  --header-height: 64px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+
+  --shadow-sm: 0 2px 8px rgba(47, 79, 122, 0.08);
+  --shadow-soft: 0 4px 20px rgba(47, 79, 122, 0.15);
+  --shadow-lifted: 0 8px 24px rgba(47, 79, 122, 0.22);
+}
