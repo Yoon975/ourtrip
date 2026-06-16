@@ -12,7 +12,11 @@
     </p>
     <div class="hero-paper__actions">
       <a href="#posts" class="btn btn--primary">여행 글 보기</a>
+      {% if session.get('user_id') %}
+      <a href="{{ url_for('main.write_post') }}" class="btn btn--outline">여행 글 작성</a>
+      {% else %}
       <a href="{{ url_for('auth.register') }}" class="btn btn--outline">시작하기</a>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -48,14 +52,60 @@
       <p class="empty-msg">아직 등록된 여행 글이 없습니다.</p>
       {% endfor %}
     </div>
+
+    {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="게시글 페이지">
+      {% if page > 1 %}
+      <a href="{{ url_for('main.index', page=page - 1) }}#posts" class="pagination__btn">← 이전</a>
+      {% endif %}
+      <span class="pagination__info">{{ page }} / {{ total_pages }} · 총 {{ total_posts }}개</span>
+      {% if page < total_pages %}
+      <a href="{{ url_for('main.index', page=page + 1) }}#posts" class="pagination__btn">다음 →</a>
+      {% endif %}
+    </nav>
+    {% endif %}
   </div>
 </section>
+
+{% if recommended %}
+<section class="section">
+  <div class="container">
+    <header class="section-head">
+      <h2 class="section-head__title">For You<span class="section-head__num">(2)</span></h2>
+      {% if recommended_destinations %}
+      <p class="section-head__desc">
+        Random Forest 모델이 회원님의 나이·성별을 기준으로 추천한 여행지:
+        {% for dest in recommended_destinations %}
+        <strong>{{ dest.country }}</strong>{% if dest.probability is not none %} ({{ (dest.probability * 100) | round(1) }}%){% endif %}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% else %}
+      <p class="section-head__desc">인기 여행 게시글입니다.</p>
+      {% endif %}
+    </header>
+    <div class="post-grid">
+      {% for post in recommended %}
+      <article class="post-card">
+        <div class="post-card__tape" aria-hidden="true"></div>
+        <a href="{{ url_for('main.post_detail', post_id=post.post_id) }}" class="post-card__link">
+          <div class="post-card__image" {% if post.image_url %}style="background-image: url('{{ post.image_url }}')"{% endif %}></div>
+          <div class="post-card__body">
+            <span class="post-card__tag">{{ post.location_country }}</span>
+            <h3 class="post-card__title">{{ post.title }}</h3>
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <section class="section section--paper">
   <div class="container cta-panel">
     <h2 class="cta-panel__title">나만의 여행 스크랩북</h2>
     <p>프로필 페이지에서 여행 통계와 기록을 스크랩북 형식으로 확인할 수 있습니다.</p>
-    <a href="{{ url_for('profile.view_profile', user_id=1) }}" class="btn btn--primary">프로필 보기</a>
+    <a href="{{ url_for('profile.my_profile') }}" class="btn btn--primary">프로필 보기</a>
   </div>
 </section>
 {% endblock %}

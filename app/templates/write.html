@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}글 작성 — Our Trip{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <p class="page-hero__label">WRITE</p>
+    <h1 class="page-hero__title">여행 글 작성<span class="page-hero__num">(1)</span></h1>
+    <p class="page-hero__desc">오늘의 여행 이야기를 스크랩북에 남겨 보세요.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <form class="form-paper write-form" method="post" enctype="multipart/form-data" action="{{ url_for('main.write_post') }}">
+      <div class="form-paper__tape" aria-hidden="true"></div>
+
+      <div class="form-row">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" value="{{ form.get('title', '') }}" placeholder="제주도 3박 4일" required />
+        {% if errors.get('title') %}<span class="field-error">{{ errors.title }}</span>{% endif %}
+      </div>
+
+      <div class="form-row form-row--split">
+        <div>
+          <label for="location_country">국가</label>
+          <input type="text" id="location_country" name="location_country" value="{{ form.get('location_country', '') }}" placeholder="대한민국" required />
+          {% if errors.get('location_country') %}<span class="field-error">{{ errors.location_country }}</span>{% endif %}
+        </div>
+        <div>
+          <label for="location_city">도시</label>
+          <input type="text" id="location_city" name="location_city" value="{{ form.get('location_city', '') }}" placeholder="제주" />
+        </div>
+      </div>
+
+      <div class="form-row form-row--split">
+        <div>
+          <label for="travel_start_date">여행 시작</label>
+          <input type="date" id="travel_start_date" name="travel_start_date" value="{{ form.get('travel_start_date', '') }}" />
+        </div>
+        <div>
+          <label for="travel_end_date">여행 종료</label>
+          <input type="date" id="travel_end_date" name="travel_end_date" value="{{ form.get('travel_end_date', '') }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="content">내용</label>
+        <textarea id="content" name="content" rows="8" placeholder="여행 후기, 일정, 팁을 자유롭게 적어 주세요." required>{{ form.get('content', '') }}</textarea>
+        {% if errors.get('content') %}<span class="field-error">{{ errors.content }}</span>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <label for="image">사진</label>
+        <input type="file" id="image" name="image" accept="image/*" />
+      </div>
+
+      <div class="write-form__actions">
+        <button type="submit" class="btn btn--primary">등록하기</button>
+        <a href="{{ url_for('main.index') }}" class="btn btn--outline">취소</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

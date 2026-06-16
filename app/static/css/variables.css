@@ -11,9 +11,10 @@
   --color-accent: #d4a373;
   --color-tape: rgba(235, 210, 140, 0.75);
 
-  --font-script: "Mrs Saint Delafield", "Caveat", cursive;
+  --font-title: "Jua", "Gaegu", sans-serif;
+  --font-script: "Gaegu", "Caveat", cursive;
   --font-receipt: "Courier Prime", "Courier New", monospace;
-  --font-body: "Noto Sans KR", sans-serif;
+  --font-body: "Gaegu", "Gowun Dodum", "Noto Sans KR", sans-serif;
 
   --container-width: 1120px;
   --header-height: 64px;

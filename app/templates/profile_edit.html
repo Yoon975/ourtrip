@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}프로필 수정 — Our Trip{% endblock %}
+{% block body_class %}page-register page-profile-edit{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="lace-border" aria-hidden="true"></div>
+
+<div class="page-wrapper">
+  <div class="notebook">
+    <div class="page page-left">
+      <div class="receipt-wrap">
+        <div class="paperclip" aria-hidden="true"></div>
+        <div class="receipt">
+          <div class="receipt-title">EDIT</div>
+          <hr class="receipt-divider" />
+          <div class="receipt-item">
+            <span>NICK</span>
+            <span class="dots"></span>
+            <span class="status" id="status-nick" data-empty="required">required</span>
+          </div>
+          <div class="receipt-item">
+            <span>GENDER</span>
+            <span class="dots"></span>
+            <span class="status" id="status-gender" data-empty="required">required</span>
+          </div>
+          <div class="receipt-item">
+            <span>BIRTH</span>
+            <span class="dots"></span>
+            <span class="status" id="status-birth" data-empty="optional">optional</span>
+          </div>
+          <hr class="receipt-divider" />
+          <p class="receipt-note">* 이메일은 변경할 수 없습니다</p>
+        </div>
+      </div>
+
+      <label class="photo-pin{% if user.profile_image_url %} has-photo{% endif %}" id="photoPin" for="profilePhoto">
+        <input type="file" id="profilePhoto" accept="image/*" />
+        {% if user.profile_image_url %}
+        <img class="photo-preview" id="photoPreview" src="{{ user.profile_image_url }}" alt="프로필 사진 미리보기" />
+        {% else %}
+        <span class="photo-placeholder">👤</span>
+        <img class="photo-preview" id="photoPreview" alt="프로필 사진 미리보기" />
+        {% endif %}
+      </label>
+
+      <form id="profileEditForm" class="sticker-card">
+        <div class="tape" aria-hidden="true"></div>
+        <div class="form-row">
+          <label for="email">EMAIL</label>
+          <input type="email" id="email" class="field-line field-line--readonly" value="{{ user.email }}" readonly />
+        </div>
+        <div class="form-row">
+          <label for="nick">NICK</label>
+          <input type="text" id="nick" name="nick" class="field-line" value="{{ user.nickname }}" required />
+        </div>
+        <div class="form-row form-row--gender">
+          <span class="form-row__label">GENDER</span>
+          <div class="gender-options">
+            <label class="gender-option">
+              <input type="radio" name="gender" value="M" required {% if user.gender == 'M' %}checked{% endif %} />
+              <span>남성</span>
+            </label>
+            <label class="gender-option">
+              <input type="radio" name="gender" value="F" required {% if user.gender == 'F' %}checked{% endif %} />
+              <span>여성</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="birth_year">BIRTH</label>
+          <input type="number" id="birth_year" name="birth_year" class="field-line" placeholder="2000" min="1900" max="2026" value="{{ user.birth_year or '' }}" />
+        </div>
+      </form>
+    </div>
+
+    <div class="page page-right">
+      <div class="watermark" aria-hidden="true"></div>
+      <h1 class="script-title">Edit Profile</h1>
+      <p class="script-subtitle">나의 여행 프로필을 업데이트하세요</p>
+
+      <h2 class="section-heading">Changes</h2>
+      <ul class="info-list">
+        <li>닉네임은 다른 사용자와 중복될 수 없습니다</li>
+        <li>성별은 필수 선택입니다</li>
+        <li>프로필 사진은 선택적으로 변경할 수 있습니다</li>
+      </ul>
+
+      <h2 class="section-heading">Save</h2>
+      <button type="submit" form="profileEditForm" class="submit-btn" id="submitBtn">Save ✎</button>
+      <div id="message" class="message" role="alert"></div>
+      <a href="{{ url_for('profile.view_profile', user_id=user.user_id) }}" class="back-link">← Back to Profile</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.PROFILE_UPDATE_API_URL = "{{ url_for('profile.api_update_profile') }}";
+</script>
+<script src="{{ url_for('static', filename='js/profile_edit.js') }}"></script>
+{% endblock %}

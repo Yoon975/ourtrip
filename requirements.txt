@@ -1,2 +1,7 @@
 Flask
 PyMySQL
+python-dotenv
+Pillow
+pandas
+scikit-learn
+joblib

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Mrs+Saint+Delafield&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Jua&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
@@ -26,12 +26,18 @@
         </button>
         <ul class="site-nav__links">
           <li><a href="{{ url_for('main.index') }}">홈</a></li>
+          {% if session.get('user_id') %}
+          <li><a href="{{ url_for('main.write_post') }}">글쓰기</a></li>
+          {% endif %}
           <li><a href="{{ url_for('main.about') }}">소개</a></li>
           <li><a href="{{ url_for('main.contact') }}">문의</a></li>
           <li><a href="{{ url_for('profile.my_profile') }}">프로필</a></li>
+          {% if session.get('role') == 'admin' %}
+          <li><a href="{{ url_for('admin.dashboard') }}">관리</a></li>
+          {% endif %}
           {% if session.get('user_id') %}
           <li><a href="{{ url_for('auth.logout') }}" class="site-nav__auth">로그아웃</a></li>
-          {% else %}
+          {% elif request.endpoint != 'auth.login' %}
           <li><a href="{{ url_for('auth.login') }}" class="site-nav__auth">로그인</a></li>
           {% endif %}
         </ul>
