@@ -78,6 +78,8 @@ if (form) {
     const formData = new FormData();
     formData.append("nick", document.getElementById("nick").value.trim());
     formData.append("birth_year", document.getElementById("birth_year").value.trim());
+    formData.append("profile_role", document.getElementById("profile_role").value.trim());
+    formData.append("bio", document.getElementById("bio").value.trim());
 
     const genderInput = document.querySelector('input[name="gender"]:checked');
     if (genderInput) {

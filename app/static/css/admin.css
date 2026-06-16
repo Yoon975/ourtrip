@@ -279,6 +279,18 @@ body.page-admin {
   color: var(--color-blue-dark);
 }
 
+.admin-card__head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-card__head-row h3 {
+  margin-bottom: 0;
+}
+
 .admin-breakdown {
   list-style: none;
   display: grid;

@@ -28,6 +28,30 @@
       <p class="section-head__desc">최근에 올라온 여행 게시글입니다.</p>
     </header>
 
+    <form class="home-search paper-panel" method="get" action="{{ url_for('main.index') }}#posts">
+      <div class="home-search__row">
+        <input type="search" name="q" value="{{ search }}" placeholder="제목·내용·작성자 검색" />
+        <select name="country">
+          <option value="">전체 국가</option>
+          {% for item in countries %}
+          <option value="{{ item }}" {% if country == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="city" value="{{ city }}" placeholder="도시" />
+        <button type="submit" class="btn btn--primary">검색</button>
+      </div>
+    </form>
+
+    {% if session.get('user_id') %}
+    <div id="notifications" class="notifications-panel paper-panel" hidden>
+      <div class="notifications-panel__head">
+        <h3>알림</h3>
+        <button type="button" class="btn btn--outline" id="markAllReadBtn">모두 읽음</button>
+      </div>
+      <ul id="notificationList" class="notification-list"></ul>
+    </div>
+    {% endif %}
+
     <div class="post-grid">
       {% for post in posts %}
       <article class="post-card">
@@ -56,11 +80,11 @@
     {% if total_pages > 1 %}
     <nav class="pagination" aria-label="게시글 페이지">
       {% if page > 1 %}
-      <a href="{{ url_for('main.index', page=page - 1) }}#posts" class="pagination__btn">← 이전</a>
+      <a href="{{ url_for('main.index', page=page - 1, q=search or None, country=country or None, city=city or None) }}#posts" class="pagination__btn">← 이전</a>
       {% endif %}
       <span class="pagination__info">{{ page }} / {{ total_pages }} · 총 {{ total_posts }}개</span>
       {% if page < total_pages %}
-      <a href="{{ url_for('main.index', page=page + 1) }}#posts" class="pagination__btn">다음 →</a>
+      <a href="{{ url_for('main.index', page=page + 1, q=search or None, country=country or None, city=city or None) }}#posts" class="pagination__btn">다음 →</a>
       {% endif %}
     </nav>
     {% endif %}
@@ -79,6 +103,8 @@
         <strong>{{ dest.country }}</strong>{% if dest.probability is not none %} ({{ (dest.probability * 100) | round(1) }}%){% endif %}{% if not loop.last %}, {% endif %}
         {% endfor %}
       </p>
+      {% elif session.get('user_id') and not model_ready %}
+      <p class="section-head__desc">추천 모델이 아직 생성되지 않았습니다. 인기 게시글을 표시합니다.</p>
       {% else %}
       <p class="section-head__desc">인기 여행 게시글입니다.</p>
       {% endif %}
@@ -108,4 +134,31 @@
     <a href="{{ url_for('profile.my_profile') }}" class="btn btn--primary">프로필 보기</a>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+{% if session.get('user_id') %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const panel = document.getElementById("notifications");
+  const list = document.getElementById("notificationList");
+  const markAllBtn = document.getElementById("markAllReadBtn");
+  if (!panel || !list) return;
+  if (window.location.hash === "#notifications") panel.hidden = false;
+  async function loadNotifications() {
+    const response = await fetch("/api/notifications");
+    const data = await response.json();
+    if (!data.success) return;
+    list.innerHTML = data.items.length
+      ? data.items.map((item) => `<li class="${item.is_read ? "" : "is-unread"}"><a href="${item.link_url || "#"}">${item.content}</a><span>${item.created_at}</span></li>`).join("")
+      : "<li class='empty-msg'>알림이 없습니다.</li>";
+  }
+  markAllBtn?.addEventListener("click", async () => {
+    await fetch("/api/notifications/read-all", { method: "POST" });
+    loadNotifications();
+  });
+  loadNotifications();
+});
+</script>
+{% endif %}
 {% endblock %}

@@ -28,6 +28,8 @@
     <button type="button" class="admin-tabs__btn" data-tab="users">회원</button>
     <button type="button" class="admin-tabs__btn" data-tab="posts">게시물</button>
     <button type="button" class="admin-tabs__btn" data-tab="comments">댓글</button>
+    <button type="button" class="admin-tabs__btn" data-tab="scraps">스크랩</button>
+    <button type="button" class="admin-tabs__btn" data-tab="contacts">문의</button>
   </div>
 
   <div id="admin-message" class="admin-message" role="alert" hidden></div>
@@ -44,7 +46,10 @@
         <ul id="country-breakdown" class="admin-breakdown"></ul>
       </div>
       <div class="admin-card admin-card--wide">
-        <h3>Random Forest 추천 모델</h3>
+        <div class="admin-card__head-row">
+          <h3>Random Forest 추천 모델</h3>
+          <button type="button" class="admin-btn admin-btn--primary" id="train-model-btn">모델 생성</button>
+        </div>
         <div id="model-metrics" class="admin-metrics"></div>
       </div>
     </div>
@@ -60,6 +65,7 @@
           <option value="admin">관리자</option>
         </select>
         <input type="search" id="user-search" class="admin-input admin-input--search" placeholder="이메일/닉네임 검색" />
+        <button type="button" class="admin-btn" id="user-search-btn">검색</button>
       </div>
     </div>
     <div class="admin-table-wrap">
@@ -79,6 +85,7 @@
       <div class="admin-toolbar">
         <select id="post-country-filter" class="admin-select admin-select--filter"><option value="">전체 국가</option></select>
         <input type="search" id="post-search" class="admin-input admin-input--search" placeholder="제목/작성자 검색" />
+        <button type="button" class="admin-btn" id="post-search-btn">검색</button>
       </div>
     </div>
     <div class="admin-table-wrap">
@@ -97,6 +104,7 @@
       <div><h2>댓글 관리</h2><p>댓글 내용과 연결된 게시물을 확인합니다.</p></div>
       <div class="admin-toolbar">
         <input type="search" id="comment-search" class="admin-input admin-input--search" placeholder="내용/작성자/게시물 검색" />
+        <button type="button" class="admin-btn" id="comment-search-btn">검색</button>
       </div>
     </div>
     <div class="admin-table-wrap">
@@ -108,6 +116,40 @@
       </table>
     </div>
     <div class="admin-pagination" id="comments-pagination"></div>
+  </section>
+
+  <section class="admin-panel" data-panel="scraps">
+    <div class="admin-panel__head admin-panel__head--toolbar">
+      <div><h2>스크랩 관리</h2></div>
+      <div class="admin-toolbar">
+        <input type="search" id="scrap-search" class="admin-input admin-input--search" placeholder="회원/게시물/국가 검색" />
+        <button type="button" class="admin-btn" id="scrap-search-btn">검색</button>
+      </div>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>ID</th><th>회원</th><th>게시물</th><th>국가</th><th>일시</th><th></th></tr></thead>
+        <tbody id="scraps-table-body"></tbody>
+      </table>
+    </div>
+    <div class="admin-pagination" id="scraps-pagination"></div>
+  </section>
+
+  <section class="admin-panel" data-panel="contacts">
+    <div class="admin-panel__head admin-panel__head--toolbar">
+      <div><h2>문의 관리</h2></div>
+      <div class="admin-toolbar">
+        <input type="search" id="contact-search" class="admin-input admin-input--search" placeholder="이름/이메일/내용 검색" />
+        <button type="button" class="admin-btn" id="contact-search-btn">검색</button>
+      </div>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>ID</th><th>이름</th><th>이메일</th><th>내용</th><th>일시</th><th></th></tr></thead>
+        <tbody id="contacts-table-body"></tbody>
+      </table>
+    </div>
+    <div class="admin-pagination" id="contacts-pagination"></div>
   </section>
 </div>
 {% endblock %}

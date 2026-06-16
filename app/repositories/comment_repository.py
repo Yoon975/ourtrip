@@ -114,6 +114,14 @@ class CommentRepository:
             cursor.execute("SELECT COUNT(*) AS cnt FROM Comments")
             return cursor.fetchone()["cnt"]
 
+    def update(self, comment_id, content):
+        with self.db.cursor() as cursor:
+            cursor.execute(
+                "UPDATE Comments SET content = %s WHERE comment_id = %s",
+                (content, comment_id),
+            )
+        self.db.commit()
+
     def delete_by_id(self, comment_id):
         with self.db.cursor() as cursor:
             cursor.execute("DELETE FROM Comments WHERE comment_id = %s", (comment_id,))

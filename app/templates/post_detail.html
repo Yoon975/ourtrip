@@ -3,7 +3,7 @@
 {% block title %}{{ post.title }} — Our Trip{% endblock %}
 
 {% block content %}
-<article class="post-detail" id="postDetail" data-post-id="{{ post.post_id }}">
+<article class="post-detail" id="postDetail" data-post-id="{{ post.post_id }}" data-can-edit="{{ 'true' if can_edit else 'false' }}">
   <div class="container">
     <header class="post-detail__header paper-panel">
       <div class="paper-panel__tape" aria-hidden="true"></div>
@@ -15,29 +15,28 @@
         <span>조회 {{ post.view_count }}</span>
         <span>·</span>
         <span id="scrapCount">스크랩 {{ scrap_count }}</span>
-        {% if post.travel_start_date %}
-        <span>·</span>
-        <span>{{ post.travel_start_date.strftime('%Y.%m.%d') }}{% if post.travel_end_date %} – {{ post.travel_end_date.strftime('%Y.%m.%d') }}{% endif %}</span>
+      </div>
+      <div class="post-detail__toolbar">
+        {% if session.get('user_id') %}
+        <button type="button" class="btn btn--outline scrap-btn{% if is_scraped %} is-scraped{% endif %}" id="scrapBtn" data-scraped="{{ 'true' if is_scraped else 'false' }}">
+          {% if is_scraped %}★ 스크랩됨{% else %}☆ 스크랩{% endif %}
+        </button>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn--outline">로그인 후 스크랩</a>
+        {% endif %}
+        {% if can_edit %}
+        <a href="{{ url_for('main.edit_post', post_id=post.post_id) }}" class="btn btn--outline">수정</a>
+        <button type="button" class="btn btn--outline" id="deletePostBtn">삭제</button>
         {% endif %}
       </div>
-      {% if session.get('user_id') %}
-      <button
-        type="button"
-        class="btn btn--outline scrap-btn{% if is_scraped %} is-scraped{% endif %}"
-        id="scrapBtn"
-        data-scraped="{{ 'true' if is_scraped else 'false' }}"
-      >
-        {% if is_scraped %}★ 스크랩됨{% else %}☆ 스크랩{% endif %}
-      </button>
-      {% else %}
-      <a href="{{ url_for('auth.login') }}" class="btn btn--outline">로그인 후 스크랩</a>
-      {% endif %}
     </header>
 
-    {% if post.image_url %}
-    <figure class="post-detail__image">
-      <img src="{{ post.image_url }}" alt="{{ post.title }}" />
-    </figure>
+    {% if post.images %}
+    <div class="post-gallery">
+      {% for image in post.images %}
+      <figure class="post-detail__image"><img src="{{ image }}" alt="{{ post.title }}" /></figure>
+      {% endfor %}
+    </div>
     {% endif %}
 
     <div class="post-detail__content paper-panel">
@@ -58,17 +57,25 @@
         <button type="submit" class="btn btn--primary">등록</button>
         <button type="button" class="btn btn--outline" id="cancelReplyBtn" hidden>답글 취소</button>
       </form>
+      {% else %}
+      <p class="empty-msg"><a href="{{ url_for('auth.login') }}">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
       {% endif %}
 
       <ul class="comment-list" id="commentList">
         {% macro render_comments(items) %}
           {% for comment in items %}
-          <li class="comment-item">
+          <li class="comment-item" data-comment-id="{{ comment.comment_id }}" data-user-id="{{ comment.user_id }}">
             <strong>{{ comment.nickname }}</strong>
             <span class="comment-item__date">{{ comment.created_at.strftime('%Y.%m.%d') if comment.created_at else '' }}</span>
-            <p>{{ comment.content }}</p>
+            <p class="comment-item__content">{{ comment.content }}</p>
             {% if session.get('user_id') %}
-            <button type="button" class="comment-reply-btn" data-comment-id="{{ comment.comment_id }}" data-nickname="{{ comment.nickname }}">답글</button>
+            <div class="comment-item__actions">
+              <button type="button" class="comment-reply-btn" data-comment-id="{{ comment.comment_id }}" data-nickname="{{ comment.nickname }}">답글</button>
+              {% if session.get('user_id') == comment.user_id %}
+              <button type="button" class="comment-edit-btn" data-comment-id="{{ comment.comment_id }}">수정</button>
+              <button type="button" class="comment-delete-btn" data-comment-id="{{ comment.comment_id }}">삭제</button>
+              {% endif %}
+            </div>
             {% endif %}
             {% if comment.replies %}
             <ul class="comment-list comment-list--replies">

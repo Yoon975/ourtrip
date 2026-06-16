@@ -83,22 +83,37 @@ class UserRepository:
             cursor.execute("SELECT COUNT(*) AS cnt FROM Users")
             return cursor.fetchone()["cnt"]
 
-    def admin_update_user(self, user_id, nickname, gender, birth_year, role):
+    def admin_update_user(self, user_id, nickname, gender, birth_year, role, email=None):
         try:
             with self.db.cursor() as cursor:
-                cursor.execute(
-                    """
-                    UPDATE Users
-                    SET nickname = %s, gender = %s, birth_year = %s, role = %s
-                    WHERE user_id = %s
-                    """,
-                    (nickname, gender, birth_year, role, user_id),
-                )
+                if email is not None:
+                    cursor.execute(
+                        """
+                        UPDATE Users
+                        SET nickname = %s, gender = %s, birth_year = %s, role = %s, email = %s
+                        WHERE user_id = %s
+                        """,
+                        (nickname, gender, birth_year, role, email, user_id),
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        UPDATE Users
+                        SET nickname = %s, gender = %s, birth_year = %s, role = %s
+                        WHERE user_id = %s
+                        """,
+                        (nickname, gender, birth_year, role, user_id),
+                    )
             self.db.commit()
         except pymysql.err.IntegrityError as exc:
             if exc.args[0] == 1062:
-                raise DuplicateError("이미 사용 중인 닉네임입니다.") from exc
+                raise DuplicateError("이미 사용 중인 닉네임 또는 이메일입니다.") from exc
             raise
+
+    def delete_by_id(self, user_id):
+        with self.db.cursor() as cursor:
+            cursor.execute("DELETE FROM Users WHERE user_id = %s", (user_id,))
+        self.db.commit()
 
     def create(self, email, password_hash, nickname, gender="U", birth_year=None, profile_image_url=None):
         try:
@@ -126,27 +141,25 @@ class UserRepository:
             )
         self.db.commit()
 
-    def update_profile(self, user_id, nickname, gender, birth_year, profile_image_url=None):
+    def update_profile(self, user_id, nickname, gender, birth_year, profile_image_url=None, bio=None, profile_role=None):
         try:
             with self.db.cursor() as cursor:
+                fields = ["nickname = %s", "gender = %s", "birth_year = %s"]
+                params = [nickname, gender, birth_year]
                 if profile_image_url is not None:
-                    cursor.execute(
-                        """
-                        UPDATE Users
-                        SET nickname = %s, gender = %s, birth_year = %s, profile_image_url = %s
-                        WHERE user_id = %s
-                        """,
-                        (nickname, gender, birth_year, profile_image_url, user_id),
-                    )
-                else:
-                    cursor.execute(
-                        """
-                        UPDATE Users
-                        SET nickname = %s, gender = %s, birth_year = %s
-                        WHERE user_id = %s
-                        """,
-                        (nickname, gender, birth_year, user_id),
-                    )
+                    fields.append("profile_image_url = %s")
+                    params.append(profile_image_url)
+                if bio is not None:
+                    fields.append("bio = %s")
+                    params.append(bio)
+                if profile_role is not None:
+                    fields.append("profile_role = %s")
+                    params.append(profile_role)
+                params.append(user_id)
+                cursor.execute(
+                    f"UPDATE Users SET {', '.join(fields)} WHERE user_id = %s",
+                    params,
+                )
             self.db.commit()
         except pymysql.err.IntegrityError as exc:
             if exc.args[0] == 1062:
@@ -163,26 +176,41 @@ class UserRepository:
             comment_count = cursor.fetchone()["cnt"]
             cursor.execute(
                 """
-                SELECT COUNT(DISTINCT location_country) AS cnt
-                FROM Posts WHERE user_id = %s
+                SELECT COUNT(DISTINCT country) AS cnt FROM (
+                    SELECT location_country AS country FROM Posts WHERE user_id = %s
+                    UNION
+                    SELECT p.location_country AS country
+                    FROM Scraps s
+                    JOIN Posts p ON s.post_id = p.post_id
+                    WHERE s.user_id = %s
+                ) AS travel_countries
                 """,
-                (user_id,),
+                (user_id, user_id),
             )
             country_count = cursor.fetchone()["cnt"]
             cursor.execute(
                 """
-                SELECT DISTINCT location_country
-                FROM Posts WHERE user_id = %s
-                ORDER BY location_country LIMIT 5
+                SELECT country FROM (
+                    SELECT location_country AS country
+                    FROM Posts
+                    WHERE user_id = %s
+                    UNION
+                    SELECT p.location_country AS country
+                    FROM Scraps s
+                    JOIN Posts p ON s.post_id = p.post_id
+                    WHERE s.user_id = %s
+                ) AS merged
+                ORDER BY country
+                LIMIT 8
                 """,
-                (user_id,),
+                (user_id, user_id),
             )
-            countries = [row["location_country"] for row in cursor.fetchall()]
+            countries = [row["country"] for row in cursor.fetchall()]
             cursor.execute(
                 """
                 SELECT post_id, title FROM Posts
                 WHERE user_id = %s
-                ORDER BY created_at DESC LIMIT 3
+                ORDER BY created_at DESC LIMIT 5
                 """,
                 (user_id,),
             )

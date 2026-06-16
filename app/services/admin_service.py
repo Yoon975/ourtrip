@@ -1,12 +1,12 @@
 from app.exceptions import NotFoundError
-from app.preprocessing.recommendation_preprocessor import RecommendationPreprocessor
 from app.repositories.comment_repository import CommentRepository
+from app.repositories.contact_repository import ContactRepository
 from app.repositories.post_repository import PostRepository
 from app.repositories.scrap_repository import ScrapRepository
 from app.repositories.user_repository import UserRepository
 from app.services.image_service import ImageService
+from app.services.recommendation_service import RecommendationService
 from app.validators.auth_validator import validate_admin_user_update
-
 
 class AdminService:
     PER_PAGE = 20
@@ -17,8 +17,8 @@ class AdminService:
         self.post_repo = PostRepository(db)
         self.comment_repo = CommentRepository(db)
         self.scrap_repo = ScrapRepository(db)
+        self.contact_repo = ContactRepository(db)
         self.image_service = ImageService()
-        self.preprocessor = RecommendationPreprocessor()
 
     def get_overview(self):
         return {
@@ -30,8 +30,11 @@ class AdminService:
             },
             "users_by_role": self.user_repo.count_by_role(),
             "posts_by_country": self.post_repo.count_by_country(),
-            "model_metrics": self.preprocessor.evaluate_model_metrics(self.db),
+            "model_metrics": RecommendationService(self.db).get_model_status(),
         }
+
+    def train_recommendation_model(self):
+        return RecommendationService(self.db).train_model()
 
     def list_users(self, page=1, role=None, search=None):
         per_page = self.PER_PAGE
@@ -54,6 +57,33 @@ class AdminService:
     def list_countries(self):
         return [row["country"] for row in self.post_repo.count_by_country()]
 
+    def list_scraps(self, page=1, search=None):
+        per_page = self.PER_PAGE
+        items = self.scrap_repo.find_paginated_for_admin(page, per_page, search)
+        total = self.scrap_repo.count_for_admin(search)
+        return self._paginate(items, page, per_page, total)
+
+    def delete_scrap(self, scrap_id):
+        self.scrap_repo.admin_delete(scrap_id)
+        return {"scrap_id": scrap_id}
+
+    def list_contacts(self, page=1, search=None):
+        per_page = self.PER_PAGE
+        items = self.contact_repo.find_paginated_for_admin(page, per_page, search)
+        total = self.contact_repo.count_for_admin(search)
+        return self._paginate(items, page, per_page, total)
+
+    def delete_contact(self, contact_id):
+        self.contact_repo.delete_by_id(contact_id)
+        return {"contact_id": contact_id}
+
+    def delete_user(self, user_id):
+        user = self.user_repo.find_by_id(user_id)
+        if not user:
+            raise NotFoundError("사용자를 찾을 수 없습니다.")
+        self.user_repo.delete_by_id(user_id)
+        return {"user_id": user_id}
+
     def update_user(self, user_id, payload):
         user = self.user_repo.find_by_id(user_id)
         if not user:
@@ -62,15 +92,22 @@ class AdminService:
         nickname = (payload.get("nickname") or payload.get("nick") or "").strip()
         gender = payload.get("gender")
         role = payload.get("role", "user")
+        email = (payload.get("email") or "").strip() or None
         birth_year_raw = payload.get("birth_year")
         birth_year = int(birth_year_raw) if birth_year_raw not in (None, "") else None
 
         validate_admin_user_update(
-            {"nickname": nickname, "gender": gender, "birth_year": birth_year, "role": role}
+            {
+                "nickname": nickname,
+                "gender": gender,
+                "birth_year": birth_year,
+                "role": role,
+                "email": email or user["email"],
+            }
         )
 
-        self.user_repo.admin_update_user(user_id, nickname, gender, birth_year, role)
-        return {"user_id": user_id, "nickname": nickname, "role": role}
+        self.user_repo.admin_update_user(user_id, nickname, gender, birth_year, role, email=email)
+        return {"user_id": user_id, "nickname": nickname, "role": role, "email": email or user["email"]}
 
     def delete_post(self, post_id):
         post = self.post_repo.find_by_id_with_author(post_id)
@@ -109,6 +146,18 @@ class AdminService:
             if hasattr(value, "strftime"):
                 data[key] = value.strftime("%Y-%m-%d %H:%M:%S")
         return data
+
+    def serialize_scraps_page(self, page_data):
+        return {
+            **page_data,
+            "items": [self._serialize_row(item) for item in page_data["items"]],
+        }
+
+    def serialize_contacts_page(self, page_data):
+        return {
+            **page_data,
+            "items": [self._serialize_row(item) for item in page_data["items"]],
+        }
 
     def serialize_users_page(self, page_data):
         return {

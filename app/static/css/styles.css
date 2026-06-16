@@ -759,3 +759,22 @@ body {
     padding: 2rem 1.25rem;
   }
 }
+
+.home-search { margin-bottom: 1.5rem; padding: 1rem; }
+.home-search__row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.home-search__row input,
+.home-search__row select { flex: 1 1 160px; padding: 0.6rem 0.75rem; }
+
+.post-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.post-gallery img { width: 100%; border-radius: 8px; }
+.post-detail__toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.comment-item__actions { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
+.notifications-panel { margin-bottom: 1.5rem; padding: 1rem; }
+.notification-list { list-style: none; }
+.notification-list li.is-unread { font-weight: 700; }
+.message-list, .message-thread__list { list-style: none; }
+.message-thread__list li { margin-bottom: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.6); border-radius: 8px; }
+.message-thread__list li.is-me { text-align: right; }
+.message-thread__form { display: grid; gap: 0.75rem; margin: 1rem 0; }
+.admin-table__actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.checkbox-inline { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }

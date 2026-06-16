@@ -13,6 +13,8 @@ def _parse_profile_update_request():
             "nickname": request.form.get("nick") or request.form.get("nickname"),
             "birth_year": request.form.get("birth_year"),
             "gender": request.form.get("gender"),
+            "bio": request.form.get("bio"),
+            "profile_role": request.form.get("profile_role"),
         }
         return payload, request.files.get("profilePhoto")
 
@@ -21,6 +23,8 @@ def _parse_profile_update_request():
         "nickname": data.get("nick") or data.get("nickname"),
         "birth_year": data.get("birth_year"),
         "gender": data.get("gender"),
+        "bio": data.get("bio"),
+        "profile_role": data.get("profile_role"),
     }
     return payload, None
 

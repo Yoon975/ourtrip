@@ -11,6 +11,7 @@ def _parse_user_update_payload():
     if request.form:
         return {
             "nickname": request.form.get("nick") or request.form.get("nickname"),
+            "email": request.form.get("email"),
             "gender": request.form.get("gender"),
             "birth_year": request.form.get("birth_year"),
             "role": request.form.get("role"),
@@ -19,6 +20,7 @@ def _parse_user_update_payload():
     data = request.get_json(silent=True) or {}
     return {
         "nickname": data.get("nick") or data.get("nickname"),
+        "email": data.get("email"),
         "gender": data.get("gender"),
         "birth_year": data.get("birth_year"),
         "role": data.get("role"),
@@ -68,6 +70,40 @@ def api_comments():
     return jsonify({"success": True, **data})
 
 
+@bp.route("/api/scraps")
+@api_admin_required
+def api_scraps():
+    page = request.args.get("page", 1, type=int)
+    search = request.args.get("q", "").strip() or None
+    data = get_admin_service().serialize_scraps_page(get_admin_service().list_scraps(page, search))
+    return jsonify({"success": True, **data})
+
+
+@bp.route("/api/contacts")
+@api_admin_required
+def api_contacts():
+    page = request.args.get("page", 1, type=int)
+    search = request.args.get("q", "").strip() or None
+    data = get_admin_service().serialize_contacts_page(get_admin_service().list_contacts(page, search))
+    return jsonify({"success": True, **data})
+
+
+@bp.route("/api/model/train", methods=["POST"])
+@api_admin_required
+def api_train_model():
+    try:
+        result = get_admin_service().train_recommendation_model()
+        return jsonify(
+            {
+                "success": True,
+                "message": "추천 모델이 생성되었습니다.",
+                "model": result,
+            }
+        )
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
 @bp.route("/api/users/<int:user_id>", methods=["POST"])
 @api_admin_required
 def api_update_user(user_id):
@@ -88,6 +124,18 @@ def api_update_user(user_id):
         return jsonify({"success": False, "message": exc.message}), exc.status_code
 
 
+@bp.route("/api/users/<int:user_id>", methods=["DELETE"])
+@api_admin_required
+def api_delete_user(user_id):
+    try:
+        if session.get("user_id") == user_id:
+            return jsonify({"success": False, "message": "본인 계정은 삭제할 수 없습니다."}), 400
+        get_admin_service().delete_user(user_id)
+        return jsonify({"success": True, "message": "회원이 삭제되었습니다."})
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
 @bp.route("/api/posts/<int:post_id>", methods=["DELETE"])
 @api_admin_required
 def api_delete_post(post_id):
@@ -104,5 +152,25 @@ def api_delete_comment(comment_id):
     try:
         get_admin_service().delete_comment(comment_id)
         return jsonify({"success": True, "message": "댓글이 삭제되었습니다."})
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
+@bp.route("/api/scraps/<int:scrap_id>", methods=["DELETE"])
+@api_admin_required
+def api_delete_scrap(scrap_id):
+    try:
+        get_admin_service().delete_scrap(scrap_id)
+        return jsonify({"success": True, "message": "스크랩이 삭제되었습니다."})
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
+@bp.route("/api/contacts/<int:contact_id>", methods=["DELETE"])
+@api_admin_required
+def api_delete_contact(contact_id):
+    try:
+        get_admin_service().delete_contact(contact_id)
+        return jsonify({"success": True, "message": "문의가 삭제되었습니다."})
     except AppException as exc:
         return jsonify({"success": False, "message": exc.message}), exc.status_code

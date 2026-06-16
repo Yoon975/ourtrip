@@ -62,6 +62,19 @@ class ProfileService:
             gender=gender,
             birth_year=birth_year,
             profile_image_url=profile_image_url,
+            bio=(payload.get("bio") or "").strip() or None,
+            profile_role=(payload.get("profile_role") or "").strip() or "TRAVEL WRITER",
         )
 
         return {"user_id": user_id, "nickname": nickname}
+
+    def list_user_posts(self, user_id, page=1, per_page=12):
+        from app.repositories.post_repository import PostRepository
+        from app.utils.media import media_url
+
+        repo = PostRepository(self.user_repo.db)
+        posts = repo.find_paginated_by_user(user_id, page, per_page)
+        total = repo.count_by_user(user_id)
+        for post in posts:
+            post["image_url"] = media_url(post.get("image_url"))
+        return posts, total

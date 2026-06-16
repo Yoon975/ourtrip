@@ -6,6 +6,8 @@ const state = {
   users: { page: 1, role: "", q: "" },
   posts: { page: 1, country: "", q: "" },
   comments: { page: 1, q: "" },
+  scraps: { page: 1, q: "" },
+  contacts: { page: 1, q: "" },
 };
 
 function showMessage(text, type = "success") {
@@ -27,6 +29,8 @@ tabButtons.forEach((button) => {
     if (tab === "users") loadUsers();
     if (tab === "posts") loadPosts();
     if (tab === "comments") loadComments();
+    if (tab === "scraps") loadScraps();
+    if (tab === "contacts") loadContacts();
   });
 });
 
@@ -77,13 +81,47 @@ async function loadOverview() {
     .join("");
 
   const metricsEl = document.getElementById("model-metrics");
+  const trainBtn = document.getElementById("train-model-btn");
   if (metrics) {
+    const trainedAt = metrics.trained_at
+      ? new Date(metrics.trained_at).toLocaleString("ko-KR")
+      : "—";
     metricsEl.innerHTML = `
-      <p>학습 샘플 <strong>${metrics.sample_count.toLocaleString()}건</strong> (게시글 + 스크랩)</p>
+      <p>상태 <strong>${metrics.exists ? "저장됨" : "미생성"}</strong></p>
+      <p>마지막 학습 <strong>${metrics.exists ? trainedAt : "—"}</strong></p>
+      <p>학습 샘플 <strong>${metrics.sample_count != null ? metrics.sample_count.toLocaleString() + "건" : "—"}</strong></p>
       <p>Top-1 정확도 <strong>${metrics.top1_accuracy != null ? (metrics.top1_accuracy * 100).toFixed(1) + "%" : "—"}</strong></p>
       <p>Top-3 정확도 <strong>${metrics.top3_accuracy != null ? (metrics.top3_accuracy * 100).toFixed(1) + "%" : "—"}</strong></p>
+      <p>피처 수 <strong>${metrics.feature_count != null ? metrics.feature_count + "개 (나이·성별·스크랩·작성·여행)" : "—"}</strong></p>
+      <p>하이브리드 <strong>${metrics.hybrid_enabled ? "TF-IDF + 협업 필터" : "—"}</strong></p>
+      <p>추천 국가 Hit@3 <strong>${metrics.hybrid_country_hit_at_3 != null ? (metrics.hybrid_country_hit_at_3 * 100).toFixed(1) + "%" : "—"}</strong>${metrics.rf_rank_country_hit_at_3 != null ? ` <span class="admin-metrics__note">(RF만 ${(metrics.rf_rank_country_hit_at_3 * 100).toFixed(1)}%)</span>` : ""}</p>
+      <p>추천 게시물 Hit@3 <strong>${metrics.hybrid_post_hit_at_3 != null ? (metrics.hybrid_post_hit_at_3 * 100).toFixed(1) + "%" : "—"}</strong></p>
       ${metrics.note ? `<p class="admin-metrics__note">${metrics.note}</p>` : ""}
+      ${!metrics.exists ? `<p class="admin-metrics__note">모델 생성 버튼을 눌러 학습·저장하세요. 추천은 저장된 모델을 사용합니다.</p>` : ""}
     `;
+  }
+  if (trainBtn) {
+    trainBtn.textContent = metrics?.exists ? "모델 재학습" : "모델 생성";
+  }
+}
+
+async function trainModel() {
+  const trainBtn = document.getElementById("train-model-btn");
+  if (!trainBtn) return;
+  trainBtn.disabled = true;
+  trainBtn.textContent = "학습 중…";
+
+  try {
+    const response = await fetch("/admin/api/model/train", { method: "POST" });
+    const data = await response.json();
+    showMessage(data.message, data.success ? "success" : "error");
+    if (data.success) {
+      loadOverview();
+    }
+  } catch {
+    showMessage("서버에 연결할 수 없습니다.", "error");
+  } finally {
+    trainBtn.disabled = false;
   }
 }
 
@@ -100,12 +138,13 @@ async function loadUsers(page = state.users.page) {
       (user) => `
     <tr data-user-row="${user.user_id}">
       <td>${user.user_id}</td>
-      <td class="admin-table__email">${user.email}</td>
+      <td class="admin-table__email"><input type="email" class="admin-input" data-field="email" value="${escapeHtml(user.email)}" /></td>
       <td><input type="text" class="admin-input" data-field="nickname" value="${escapeHtml(user.nickname)}" /></td>
       <td>
         <select class="admin-select" data-field="gender">
           <option value="M" ${user.gender === "M" ? "selected" : ""}>남</option>
           <option value="F" ${user.gender === "F" ? "selected" : ""}>여</option>
+          <option value="U" ${user.gender === "U" ? "selected" : ""}>미선택</option>
         </select>
       </td>
       <td><input type="number" class="admin-input admin-input--short" data-field="birth_year" value="${user.birth_year || ""}" /></td>
@@ -116,13 +155,79 @@ async function loadUsers(page = state.users.page) {
         </select>
       </td>
       <td>${(user.created_at || "").slice(0, 10)}</td>
-      <td><button type="button" class="admin-btn admin-btn--primary" data-save-user="${user.user_id}">저장</button></td>
+      <td class="admin-table__actions">
+        <button type="button" class="admin-btn admin-btn--primary" data-save-user="${user.user_id}">저장</button>
+        <button type="button" class="admin-btn admin-btn--danger" data-delete-user="${user.user_id}">삭제</button>
+      </td>
     </tr>`
     )
     .join("");
 
   bindUserSaveButtons();
+  bindUserDeleteButtons();
   renderPagination("users-pagination", data.page, data.total_pages, loadUsers);
+}
+
+async function loadScraps(page = state.scraps.page) {
+  state.scraps.page = page;
+  const params = new URLSearchParams({ page, q: state.scraps.q });
+  const response = await fetch(`/admin/api/scraps?${params}`);
+  const data = await response.json();
+  if (!data.success) return;
+  document.getElementById("scraps-table-body").innerHTML = data.items
+    .map(
+      (scrap) => `
+    <tr>
+      <td>${scrap.scrap_id}</td>
+      <td>${escapeHtml(scrap.nickname)}</td>
+      <td><a href="/posts/${scrap.post_id}" class="admin-link">${escapeHtml(scrap.title)}</a></td>
+      <td>${escapeHtml(scrap.location_country || "")}</td>
+      <td>${(scrap.created_at || "").slice(0, 10)}</td>
+      <td><button type="button" class="admin-btn admin-btn--danger" data-delete-scrap="${scrap.scrap_id}">삭제</button></td>
+    </tr>`
+    )
+    .join("");
+  document.querySelectorAll("[data-delete-scrap]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      if (!confirm("스크랩을 삭제할까요?")) return;
+      const response = await fetch(`/admin/api/scraps/${button.dataset.deleteScrap}`, { method: "DELETE" });
+      const result = await response.json();
+      showMessage(result.message, result.success ? "success" : "error");
+      if (result.success) loadScraps(state.scraps.page);
+    });
+  });
+  renderPagination("scraps-pagination", data.page, data.total_pages, loadScraps);
+}
+
+async function loadContacts(page = state.contacts.page) {
+  state.contacts.page = page;
+  const params = new URLSearchParams({ page, q: state.contacts.q });
+  const response = await fetch(`/admin/api/contacts?${params}`);
+  const data = await response.json();
+  if (!data.success) return;
+  document.getElementById("contacts-table-body").innerHTML = data.items
+    .map(
+      (contact) => `
+    <tr>
+      <td>${contact.contact_id}</td>
+      <td>${escapeHtml(contact.name)}</td>
+      <td>${escapeHtml(contact.email)}</td>
+      <td class="admin-table__content">${escapeHtml(contact.message)}</td>
+      <td>${(contact.created_at || "").slice(0, 10)}</td>
+      <td><button type="button" class="admin-btn admin-btn--danger" data-delete-contact="${contact.contact_id}">삭제</button></td>
+    </tr>`
+    )
+    .join("");
+  document.querySelectorAll("[data-delete-contact]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      if (!confirm("문의를 삭제할까요?")) return;
+      const response = await fetch(`/admin/api/contacts/${button.dataset.deleteContact}`, { method: "DELETE" });
+      const result = await response.json();
+      showMessage(result.message, result.success ? "success" : "error");
+      if (result.success) loadContacts(state.contacts.page);
+    });
+  });
+  renderPagination("contacts-pagination", data.page, data.total_pages, loadContacts);
 }
 
 async function loadPosts(page = state.posts.page) {
@@ -208,6 +313,7 @@ function bindUserSaveButtons() {
       button.disabled = true;
       const formData = new FormData();
       formData.append("nickname", getRowField(row, "nickname"));
+      formData.append("email", getRowField(row, "email"));
       formData.append("gender", getRowField(row, "gender"));
       formData.append("birth_year", getRowField(row, "birth_year"));
       formData.append("role", getRowField(row, "role"));
@@ -220,6 +326,19 @@ function bindUserSaveButtons() {
       } finally {
         button.disabled = false;
       }
+    });
+  });
+}
+
+function bindUserDeleteButtons() {
+  document.querySelectorAll("[data-delete-user]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const userId = button.dataset.deleteUser;
+      if (!confirm("회원을 삭제할까요?")) return;
+      const response = await fetch(`/admin/api/users/${userId}`, { method: "DELETE" });
+      const data = await response.json();
+      showMessage(data.message, data.success ? "success" : "error");
+      if (data.success) loadUsers(state.users.page);
     });
   });
 }
@@ -274,8 +393,8 @@ function bindCommentDeleteButtons() {
   });
 }
 
-document.getElementById("user-role-filter")?.addEventListener("change", (e) => {
-  state.users.role = e.target.value;
+document.getElementById("user-search-btn")?.addEventListener("click", () => {
+  state.users.q = document.getElementById("user-search").value.trim();
   loadUsers(1);
 });
 document.getElementById("user-search")?.addEventListener("keydown", (e) => {
@@ -284,8 +403,8 @@ document.getElementById("user-search")?.addEventListener("keydown", (e) => {
     loadUsers(1);
   }
 });
-document.getElementById("post-country-filter")?.addEventListener("change", (e) => {
-  state.posts.country = e.target.value;
+document.getElementById("post-search-btn")?.addEventListener("click", () => {
+  state.posts.q = document.getElementById("post-search").value.trim();
   loadPosts(1);
 });
 document.getElementById("post-search")?.addEventListener("keydown", (e) => {
@@ -294,11 +413,33 @@ document.getElementById("post-search")?.addEventListener("keydown", (e) => {
     loadPosts(1);
   }
 });
+document.getElementById("comment-search-btn")?.addEventListener("click", () => {
+  state.comments.q = document.getElementById("comment-search").value.trim();
+  loadComments(1);
+});
 document.getElementById("comment-search")?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     state.comments.q = e.target.value.trim();
     loadComments(1);
   }
 });
+document.getElementById("scrap-search-btn")?.addEventListener("click", () => {
+  state.scraps.q = document.getElementById("scrap-search").value.trim();
+  loadScraps(1);
+});
+document.getElementById("contact-search-btn")?.addEventListener("click", () => {
+  state.contacts.q = document.getElementById("contact-search").value.trim();
+  loadContacts(1);
+});
+document.getElementById("user-role-filter")?.addEventListener("change", (e) => {
+  state.users.role = e.target.value;
+  loadUsers(1);
+});
+document.getElementById("post-country-filter")?.addEventListener("change", (e) => {
+  state.posts.country = e.target.value;
+  loadPosts(1);
+});
+
+document.getElementById("train-model-btn")?.addEventListener("click", trainModel);
 
 loadOverview();

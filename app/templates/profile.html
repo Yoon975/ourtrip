@@ -37,7 +37,7 @@
           <div class="receipt__row">
             <span>ROLE</span>
             <span class="receipt__dots"></span>
-            <span>TRAVEL WRITER</span>
+            <span>{{ user.profile_role or 'TRAVEL WRITER' }}</span>
           </div>
 
           <div class="receipt__divider"></div>
@@ -105,10 +105,11 @@
       <article class="journal-section">
         <h2 class="journal-section__title">Strengths<span class="journal-section__num">(1)</span></h2>
         <p>
-          여행지의 풍경과 경험을 글로 남기며,<br />
-          사진과 함께 기록을 공유합니다.<br />
-          일정·동선·팁을 정리해 다른 여행자에게<br />
-          도움이 되는 콘텐츠를 만듭니다.
+          {% if user.bio %}
+          {{ user.bio | replace('\n', '<br />') | safe }}
+          {% else %}
+          여행지의 풍경과 경험을 글로 남기며, 사진과 함께 기록을 공유합니다.
+          {% endif %}
         </p>
       </article>
 
@@ -142,6 +143,9 @@
           {% else %}
           스크랩한 글이 아직 없습니다.
           {% endif %}
+          {% if stats.scrap_count > 5 %}
+          <br /><a href="{{ url_for('main.my_scraps') }}" class="recent-posts__link">전체 스크랩 보기 →</a>
+          {% endif %}
         </p>
       </article>
 
@@ -154,6 +158,9 @@
           {% endfor %}
           {% else %}
           작성한 여행 글이 아직 없습니다.
+          {% endif %}
+          {% if stats.post_count > 5 %}
+          <br /><a href="{{ url_for('message.user_posts', user_id=user.user_id) }}" class="recent-posts__link">전체 게시물 보기 →</a>
           {% endif %}
         </p>
       </article>
@@ -197,7 +204,7 @@
       <p><strong>{{ user.nickname }}</strong>님의 여행 프로필</p>
     </div>
     <div class="profile-toast__actions">
-      <a href="mailto:{{ user.email }}" class="profile-toast__btn">메시지 보내기</a>
+      <a href="{{ url_for('message.conversation', user_id=user.user_id) }}" class="profile-toast__btn">메시지 보내기</a>
       <button type="button" class="profile-toast__close" aria-label="닫기" data-close-toast>&times;</button>
     </div>
   </aside>

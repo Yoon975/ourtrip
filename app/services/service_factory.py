@@ -1,6 +1,9 @@
 from app.db import get_db
 from app.services.auth_service import AuthService
 from app.services.comment_service import CommentService
+from app.services.contact_service import ContactService
+from app.services.message_service import MessageService
+from app.services.notification_service import NotificationService
 from app.services.post_service import PostService
 from app.services.profile_service import ProfileService
 from app.services.recommendation_service import RecommendationService
@@ -29,6 +32,18 @@ def get_comment_service():
 
 def get_recommendation_service():
     return RecommendationService(get_db())
+
+
+def get_contact_service():
+    return ContactService(get_db())
+
+
+def get_notification_service():
+    return NotificationService(get_db())
+
+
+def get_message_service():
+    return MessageService(get_db())
 
 
 def get_admin_service():

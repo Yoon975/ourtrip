@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.nickname }}의 게시물 — Our Trip{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <h1 class="page-hero__title">{{ user.nickname }}의 게시물</h1>
+    <p class="page-hero__desc">총 {{ total }}개</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="post-grid">
+      {% for post in posts %}
+      <article class="post-card">
+        <a href="{{ url_for('main.post_detail', post_id=post.post_id) }}" class="post-card__link">
+          <div class="post-card__image" {% if post.image_url %}style="background-image:url('{{ post.image_url }}')"{% endif %}></div>
+          <div class="post-card__body">
+            <span class="post-card__tag">{{ post.location_country }}</span>
+            <h3 class="post-card__title">{{ post.title }}</h3>
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </div>
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+      {% if page > 1 %}<a href="{{ url_for('message.user_posts', user_id=user.user_id, page=page-1) }}" class="pagination__btn">← 이전</a>{% endif %}
+      <span class="pagination__info">{{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}<a href="{{ url_for('message.user_posts', user_id=user.user_id, page=page+1) }}" class="pagination__btn">다음 →</a>{% endif %}
+    </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

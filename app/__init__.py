@@ -16,13 +16,31 @@ def create_app():
     from app.controllers.main_controller import bp as main_bp
     from app.controllers.profile_controller import bp as profile_bp
     from app.controllers.admin_controller import bp as admin_bp
+    from app.controllers.message_controller import bp as message_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(message_bp)
 
     app.jinja_env.globals["media_url"] = _media_url_global
+
+    @app.context_processor
+    def inject_nav_counts():
+        from flask import session
+
+        counts = {"unread_messages": 0, "unread_notifications": 0}
+        user_id = session.get("user_id")
+        if user_id:
+            try:
+                from app.services.service_factory import get_message_service, get_notification_service
+
+                counts["unread_messages"] = get_message_service().unread_count(user_id)
+                counts["unread_notifications"] = get_notification_service().get_summary(user_id)["unread_count"]
+            except Exception:
+                pass
+        return counts
 
     return app
 

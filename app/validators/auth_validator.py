@@ -59,10 +59,15 @@ def validate_birth_year(value):
     return None
 
 
-def validate_gender(value):
-    if value not in ("M", "F"):
+def validate_gender(value, allow_unknown=False):
+    allowed = ("M", "F", "U") if allow_unknown else ("M", "F")
+    if value not in allowed:
         return "성별을 선택해 주세요."
     return None
+
+
+def validate_admin_gender(value):
+    return validate_gender(value, allow_unknown=True)
 
 
 def validate_signup_payload(data):
@@ -115,8 +120,9 @@ def validate_admin_user_update(data):
     errors = {}
     nickname_error = validate_nickname(data.get("nickname"))
     birth_error = validate_birth_year(data.get("birth_year"))
-    gender_error = validate_gender(data.get("gender"))
+    gender_error = validate_admin_gender(data.get("gender"))
     role_error = validate_role(data.get("role"))
+    email_error = validate_email(data.get("email")) if data.get("email") else None
 
     if nickname_error:
         errors["nickname"] = nickname_error
@@ -126,6 +132,8 @@ def validate_admin_user_update(data):
         errors["gender"] = gender_error
     if role_error:
         errors["role"] = role_error
+    if email_error:
+        errors["email"] = email_error
 
     if errors:
         raise ValidationError("입력값을 확인해 주세요.", errors=errors)

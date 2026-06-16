@@ -77,6 +77,14 @@
           <label for="birth_year">BIRTH</label>
           <input type="number" id="birth_year" name="birth_year" class="field-line" placeholder="2000" min="1900" max="2026" value="{{ user.birth_year or '' }}" />
         </div>
+        <div class="form-row">
+          <label for="profile_role">ROLE</label>
+          <input type="text" id="profile_role" name="profile_role" class="field-line" value="{{ user.profile_role or 'TRAVEL WRITER' }}" maxlength="50" />
+        </div>
+        <div class="form-row">
+          <label for="bio">STRENGTHS</label>
+          <textarea id="bio" name="bio" class="field-line" rows="4" maxlength="500">{{ user.bio or '' }}</textarea>
+        </div>
       </form>
     </div>
 
