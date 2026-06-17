@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ other_user.nickname }}와의 대화 — Our Trip{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="paper-panel message-thread" id="messageThread" data-other-user-id="{{ other_user.user_id }}">
+      <h1>{{ other_user.nickname }}님과의 대화</h1>
+      <ul class="message-thread__list" id="messageList">
+        {% for message in messages %}
+        <li class="{% if message.sender_id == session.get('user_id') %}is-me{% else %}is-other{% endif %}">
+          <strong>{% if message.sender_id == session.get('user_id') %}나{% else %}{{ message.sender_nickname }}{% endif %}</strong>
+          <p>{{ message.content }}</p>
+          <span>{{ message.created_at.strftime('%Y-%m-%d %H:%M') if message.created_at else '' }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <form id="messageForm" class="message-thread__form">
+        <textarea id="messageContent" rows="3" placeholder="메시지를 입력하세요." required></textarea>
+        <button type="submit" class="btn btn--primary">보내기</button>
+      </form>
+      <a href="{{ url_for('message.inbox') }}" class="btn btn--outline">목록으로</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("messageForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const thread = document.getElementById("messageThread");
+  const content = document.getElementById("messageContent").value.trim();
+  const response = await fetch(`/api/messages/${thread.dataset.otherUserId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+  const data = await response.json();
+  if (data.success) window.location.reload();
+  else alert(data.message || "전송에 실패했습니다.");
+});
+</script>
+{% endblock %}

@@ -14,6 +14,7 @@
 <section class="section">
   <div class="container">
     <form class="form-paper" method="post" action="{{ url_for('main.contact') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
       <div class="form-paper__tape" aria-hidden="true"></div>
 
       <div class="form-row">

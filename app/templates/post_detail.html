@@ -3,7 +3,7 @@
 {% block title %}{{ post.title }} — Our Trip{% endblock %}
 
 {% block content %}
-<article class="post-detail">
+<article class="post-detail" id="postDetail" data-post-id="{{ post.post_id }}">
   <div class="container">
     <header class="post-detail__header paper-panel">
       <div class="paper-panel__tape" aria-hidden="true"></div>
@@ -13,17 +13,30 @@
         <a href="{{ url_for('profile.view_profile', user_id=post.user_id) }}">{{ post.nickname }}</a>
         <span>·</span>
         <span>조회 {{ post.view_count }}</span>
-        {% if post.travel_start_date %}
         <span>·</span>
-        <span>{{ post.travel_start_date.strftime('%Y.%m.%d') }}{% if post.travel_end_date %} – {{ post.travel_end_date.strftime('%Y.%m.%d') }}{% endif %}</span>
+        <span id="scrapCount">스크랩 {{ scrap_count }}</span>
+      </div>
+      <div class="post-detail__toolbar">
+        {% if session.get('user_id') %}
+        <button type="button" class="btn btn--outline scrap-btn{% if is_scraped %} is-scraped{% endif %}" id="scrapBtn" data-scraped="{{ 'true' if is_scraped else 'false' }}">
+          {% if is_scraped %}★ 스크랩됨{% else %}☆ 스크랩{% endif %}
+        </button>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn--outline">로그인 후 스크랩</a>
+        {% endif %}
+        {% if can_edit %}
+        <a href="{{ url_for('main.edit_post', post_id=post.post_id) }}" class="btn btn--outline">수정</a>
+        <button type="button" class="btn btn--outline" id="deletePostBtn">삭제</button>
         {% endif %}
       </div>
     </header>
 
-    {% if post.image_url %}
-    <figure class="post-detail__image">
-      <img src="{{ post.image_url }}" alt="{{ post.title }}" />
-    </figure>
+    {% if post.images %}
+    <div class="post-gallery">
+      {% for image in post.images %}
+      <figure class="post-detail__image"><img src="{{ image }}" alt="{{ post.title }}" /></figure>
+      {% endfor %}
+    </div>
     {% endif %}
 
     <div class="post-detail__content paper-panel">
@@ -32,16 +45,52 @@
 
     <section class="comments">
       <h2 class="section-head__title">Comments<span class="section-head__num">(2)</span></h2>
-      <ul class="comment-list">
-        {% for comment in comments %}
-        <li class="comment-item">
-          <strong>{{ comment.nickname }}</strong>
-          <span class="comment-item__date">{{ comment.created_at.strftime('%Y.%m.%d') if comment.created_at else '' }}</span>
-          <p>{{ comment.content }}</p>
-        </li>
+
+      {% if session.get('user_id') %}
+      <form class="comment-form paper-panel" id="commentForm">
+        <div class="form-row">
+          <label for="commentContent">댓글</label>
+          <textarea id="commentContent" rows="3" placeholder="댓글을 입력하세요." required></textarea>
+        </div>
+        <input type="hidden" id="parentCommentId" value="" />
+        <p class="reply-target" id="replyTarget" hidden></p>
+        <button type="submit" class="btn btn--primary">등록</button>
+        <button type="button" class="btn btn--outline" id="cancelReplyBtn" hidden>답글 취소</button>
+      </form>
+      {% else %}
+      <p class="empty-msg"><a href="{{ url_for('auth.login') }}">로그인</a> 후 댓글을 작성할 수 있습니다.</p>
+      {% endif %}
+
+      <ul class="comment-list" id="commentList">
+        {% macro render_comments(items) %}
+          {% for comment in items %}
+          <li class="comment-item" data-comment-id="{{ comment.comment_id }}" data-user-id="{{ comment.user_id }}">
+            <strong>{{ comment.nickname }}</strong>
+            <span class="comment-item__date">{{ comment.created_at.strftime('%Y.%m.%d') if comment.created_at else '' }}</span>
+            <p class="comment-item__content">{{ comment.content }}</p>
+            {% if session.get('user_id') %}
+            <div class="comment-item__actions">
+              <button type="button" class="comment-reply-btn" data-comment-id="{{ comment.comment_id }}" data-nickname="{{ comment.nickname }}">답글</button>
+              {% if session.get('user_id') == comment.user_id %}
+              <button type="button" class="comment-edit-btn" data-comment-id="{{ comment.comment_id }}">수정</button>
+              <button type="button" class="comment-delete-btn" data-comment-id="{{ comment.comment_id }}">삭제</button>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% if comment.replies %}
+            <ul class="comment-list comment-list--replies">
+              {{ render_comments(comment.replies) }}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        {% endmacro %}
+
+        {% if comments %}
+          {{ render_comments(comments) }}
         {% else %}
-        <li class="empty-msg">아직 댓글이 없습니다.</li>
-        {% endfor %}
+          <li class="empty-msg">아직 댓글이 없습니다.</li>
+        {% endif %}
       </ul>
     </section>
 
@@ -50,4 +99,8 @@
     </div>
   </div>
 </article>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/post_detail.js') }}"></script>
 {% endblock %}

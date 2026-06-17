@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{% if edit_mode %}글 수정{% else %}글 작성{% endif %} — Our Trip{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <p class="page-hero__label">{% if edit_mode %}EDIT{% else %}WRITE{% endif %}</p>
+    <h1 class="page-hero__title">{% if edit_mode %}여행 글 수정{% else %}여행 글 작성{% endif %}<span class="page-hero__num">(1)</span></h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <form
+      class="form-paper write-form"
+      method="post"
+      enctype="multipart/form-data"
+      action="{% if edit_mode %}{{ url_for('main.edit_post', post_id=post.post_id) }}{% else %}{{ url_for('main.write_post') }}{% endif %}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <div class="form-paper__tape" aria-hidden="true"></div>
+
+      <div class="form-row">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" value="{{ form.get('title', '') }}" placeholder="제주도 3박 4일" required />
+      </div>
+
+      <div class="form-row form-row--split">
+        <div>
+          <label for="location_country">국가</label>
+          <input type="text" id="location_country" name="location_country" value="{{ form.get('location_country', '') }}" required />
+        </div>
+        <div>
+          <label for="location_city">도시</label>
+          <input type="text" id="location_city" name="location_city" value="{{ form.get('location_city', '') }}" />
+        </div>
+      </div>
+
+      <div class="form-row form-row--split">
+        <div>
+          <label for="travel_start_date">여행 시작</label>
+          <input type="date" id="travel_start_date" name="travel_start_date" value="{{ form.get('travel_start_date', '') }}" />
+        </div>
+        <div>
+          <label for="travel_end_date">여행 종료</label>
+          <input type="date" id="travel_end_date" name="travel_end_date" value="{{ form.get('travel_end_date', '') }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="content">내용</label>
+        <textarea id="content" name="content" rows="8" required>{{ form.get('content', '') }}</textarea>
+      </div>
+
+      {% if edit_mode and post.images %}
+      <div class="form-row">
+        <label>현재 사진</label>
+        <div class="post-gallery post-gallery--compact">
+          {% for image in post.images %}
+          <img src="{{ image }}" alt="" />
+          {% endfor %}
+        </div>
+        <label class="checkbox-inline">
+          <input type="checkbox" name="replace_images" value="1" />
+          새 사진으로 전체 교체
+        </label>
+      </div>
+      {% endif %}
+
+      <div class="form-row">
+        <label for="images">사진 (여러 장 선택 가능)</label>
+        <input type="file" id="images" name="images" accept="image/*" multiple />
+      </div>
+
+      <div class="write-form__actions">
+        <button type="submit" class="btn btn--primary">{% if edit_mode %}수정하기{% else %}등록하기{% endif %}</button>
+        <a href="{% if edit_mode %}{{ url_for('main.post_detail', post_id=post.post_id) }}{% else %}{{ url_for('main.index') }}{% endif %}" class="btn btn--outline">취소</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

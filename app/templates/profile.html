@@ -3,9 +3,6 @@
 {% block title %}{{ user.nickname }} — Our Trip{% endblock %}
 {% block body_class %}page-profile{% endblock %}
 
-{% block header %}{% endblock %}
-{% block footer %}{% endblock %}
-
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}" />
 {% endblock %}
@@ -40,7 +37,7 @@
           <div class="receipt__row">
             <span>ROLE</span>
             <span class="receipt__dots"></span>
-            <span>TRAVEL WRITER</span>
+            <span>{{ user.profile_role or 'TRAVEL WRITER' }}</span>
           </div>
 
           <div class="receipt__divider"></div>
@@ -108,10 +105,11 @@
       <article class="journal-section">
         <h2 class="journal-section__title">Strengths<span class="journal-section__num">(1)</span></h2>
         <p>
-          여행지의 풍경과 경험을 글로 남기며,<br />
-          사진과 함께 기록을 공유합니다.<br />
-          일정·동선·팁을 정리해 다른 여행자에게<br />
-          도움이 되는 콘텐츠를 만듭니다.
+          {% if user.bio %}
+          {{ user.bio | replace('\n', '<br />') | safe }}
+          {% else %}
+          여행지의 풍경과 경험을 글로 남기며, 사진과 함께 기록을 공유합니다.
+          {% endif %}
         </p>
       </article>
 
@@ -136,20 +134,39 @@
       </article>
 
       <article class="journal-section">
-        <h2 class="journal-section__title">Recent Posts<span class="journal-section__num">(4)</span></h2>
-        <p>
-          {% if recent_posts %}
-          {% for post in recent_posts %}
-          {{ post.title }}{% if not loop.last %}<br />{% endif %}
+        <h2 class="journal-section__title">My Scraps<span class="journal-section__num">(4)</span></h2>
+        <p class="recent-posts">
+          {% if scraped_posts %}
+          {% for post in scraped_posts %}
+          <a href="{{ url_for('main.post_detail', post_id=post.post_id) }}" class="recent-posts__link">{{ post.title }}</a>{% if not loop.last %}<br />{% endif %}
           {% endfor %}
           {% else %}
-          작성한 여행 글이 아직 없습니다.
+          스크랩한 글이 아직 없습니다.
+          {% endif %}
+          {% if stats.scrap_count > 5 %}
+          <br /><a href="{{ url_for('main.my_scraps') }}" class="recent-posts__link">전체 스크랩 보기 →</a>
           {% endif %}
         </p>
       </article>
 
       <article class="journal-section">
-        <h2 class="journal-section__title">About<span class="journal-section__num">(5)</span></h2>
+        <h2 class="journal-section__title">Recent Posts<span class="journal-section__num">(5)</span></h2>
+        <p class="recent-posts">
+          {% if recent_posts %}
+          {% for post in recent_posts %}
+          <a href="{{ url_for('main.post_detail', post_id=post.post_id) }}" class="recent-posts__link">{{ post.title }}</a>{% if not loop.last %}<br />{% endif %}
+          {% endfor %}
+          {% else %}
+          작성한 여행 글이 아직 없습니다.
+          {% endif %}
+          {% if stats.post_count > 5 %}
+          <br /><a href="{{ url_for('message.user_posts', user_id=user.user_id) }}" class="recent-posts__link">전체 게시물 보기 →</a>
+          {% endif %}
+        </p>
+      </article>
+
+      <article class="journal-section">
+        <h2 class="journal-section__title">About<span class="journal-section__num">(6)</span></h2>
         <p>
           {{ user.nickname }}님의 여행 스크랩북입니다.<br />
           함께한 순간들을 모아두는 개인 여행 아카이브.
@@ -158,6 +175,24 @@
     </section>
   </div>
 
+  {% if session.get('user_id') == user.user_id %}
+  <aside class="profile-toast profile-toast--own">
+    <div class="profile-toast__info">
+      <div class="profile-toast__avatar">
+        {% if user.profile_image_url %}
+        <img src="{{ user.profile_image_url }}" alt="" />
+        {% else %}
+        <span>{{ user.nickname[0] }}</span>
+        {% endif %}
+      </div>
+      <p><strong>{{ user.nickname }}</strong>님의 여행 프로필</p>
+    </div>
+    <div class="profile-toast__actions">
+      <a href="{{ url_for('profile.edit_profile') }}" class="profile-toast__btn">프로필 수정</a>
+      <a href="{{ url_for('profile.account_settings') }}" class="profile-toast__btn profile-toast__btn--ghost">계정 설정</a>
+    </div>
+  </aside>
+  {% elif session.get('user_id') != user.user_id %}
   <aside class="profile-toast" id="profile-toast">
     <div class="profile-toast__info">
       <div class="profile-toast__avatar">
@@ -170,9 +205,10 @@
       <p><strong>{{ user.nickname }}</strong>님의 여행 프로필</p>
     </div>
     <div class="profile-toast__actions">
-      <a href="mailto:{{ user.email }}" class="profile-toast__btn">메시지 보내기</a>
+      <a href="{{ url_for('message.conversation', user_id=user.user_id) }}" class="profile-toast__btn">메시지 보내기</a>
       <button type="button" class="profile-toast__close" aria-label="닫기" data-close-toast>&times;</button>
     </div>
   </aside>
+  {% endif %}
 </div>
 {% endblock %}

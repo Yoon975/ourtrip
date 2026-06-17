@@ -6,17 +6,17 @@ body {
 }
 
 .scrapbook {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--header-height) - 120px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem 6rem;
+  padding: 2rem 1.5rem 6rem;
   position: relative;
 }
 
-.scrapbook__lace {
+.page-profile .scrapbook__lace {
   position: fixed;
-  top: 0;
+  top: var(--header-height);
   right: 0;
   width: 280px;
   height: 120px;
@@ -309,6 +309,17 @@ body {
   font-weight: 400;
 }
 
+.recent-posts__link {
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.recent-posts__link:hover {
+  color: var(--color-blue-dark);
+}
+
 /* Toast bar */
 .profile-toast {
   position: fixed;
@@ -388,6 +399,16 @@ body {
 
 .profile-toast__btn:hover {
   background: #f0f0f0;
+}
+
+.profile-toast__btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff;
+}
+
+.profile-toast__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .profile-toast__close {

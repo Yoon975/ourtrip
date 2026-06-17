@@ -13,6 +13,7 @@
 <section class="section">
   <div class="container">
     <form class="form-paper" method="post" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
       <div class="form-paper__tape" aria-hidden="true"></div>
 
       <div class="form-row">
@@ -27,6 +28,8 @@
 
       <button type="submit" class="btn btn--primary">로그인</button>
       <p class="form-paper__link">
+        <a href="{{ url_for('auth.forgot_password') }}">비밀번호 찾기</a>
+        ·
         계정이 없으신가요? <a href="{{ url_for('auth.register') }}">회원가입</a>
       </p>
     </form>

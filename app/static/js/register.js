@@ -12,6 +12,19 @@ const receiptFields = [
   { inputId: "birth_year", statusId: "status-birth", optional: true },
 ];
 
+function updateGenderStatus() {
+  const status = document.getElementById("status-gender");
+  if (!status) return;
+  const selected = document.querySelector('input[name="gender"]:checked');
+  if (selected) {
+    status.textContent = "Complete";
+    status.classList.add("complete");
+  } else {
+    status.textContent = "required";
+    status.classList.remove("complete");
+  }
+}
+
 function updateReceiptStatus() {
   receiptFields.forEach(({ inputId, statusId, optional }) => {
     const input = document.getElementById(inputId);
@@ -26,10 +39,15 @@ function updateReceiptStatus() {
       status.classList.remove("complete");
     }
   });
+  updateGenderStatus();
 }
 
 receiptFields.forEach(({ inputId }) => {
   document.getElementById(inputId).addEventListener("input", updateReceiptStatus);
+});
+
+document.querySelectorAll('input[name="gender"]').forEach((radio) => {
+  radio.addEventListener("change", updateGenderStatus);
 });
 
 if (photoInput && photoPin && photoPreview) {
@@ -59,18 +77,25 @@ if (form) {
     messageEl.textContent = "";
     submitBtn.disabled = true;
 
-    const payload = {
-      u_id: document.getElementById("u_id").value.trim(),
-      pw: document.getElementById("pw").value,
-      nick: document.getElementById("nick").value.trim(),
-      birth_year: document.getElementById("birth_year").value.trim(),
-    };
+    const formData = new FormData();
+    formData.append("u_id", document.getElementById("u_id").value.trim());
+    formData.append("pw", document.getElementById("pw").value);
+    formData.append("nick", document.getElementById("nick").value.trim());
+    formData.append("birth_year", document.getElementById("birth_year").value.trim());
+
+    const genderInput = document.querySelector('input[name="gender"]:checked');
+    if (genderInput) {
+      formData.append("gender", genderInput.value);
+    }
+
+    if (photoInput && photoInput.files[0]) {
+      formData.append("profilePhoto", photoInput.files[0]);
+    }
 
     try {
       const response = await fetch(window.REGISTER_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
       const data = await response.json();
 
