@@ -3,7 +3,7 @@
 {% block title %}{{ post.title }} — Our Trip{% endblock %}
 
 {% block content %}
-<article class="post-detail" id="postDetail" data-post-id="{{ post.post_id }}" data-can-edit="{{ 'true' if can_edit else 'false' }}">
+<article class="post-detail" id="postDetail" data-post-id="{{ post.post_id }}">
   <div class="container">
     <header class="post-detail__header paper-panel">
       <div class="paper-panel__tape" aria-hidden="true"></div>

@@ -98,7 +98,11 @@
       <h2 class="section-head__title">For You<span class="section-head__num">(2)</span></h2>
       {% if recommended_destinations %}
       <p class="section-head__desc">
+        {% if stage3_ready %}
+        3단계 추천(여행지 예측 · 콘텐츠 유사도 · 조회 기록)으로 선별한 여행지:
+        {% else %}
         Random Forest 모델이 회원님의 나이·성별을 기준으로 추천한 여행지:
+        {% endif %}
         {% for dest in recommended_destinations %}
         <strong>{{ dest.country }}</strong>{% if dest.probability is not none %} ({{ (dest.probability * 100) | round(1) }}%){% endif %}{% if not loop.last %}, {% endif %}
         {% endfor %}
@@ -118,6 +122,9 @@
           <div class="post-card__body">
             <span class="post-card__tag">{{ post.location_country }}</span>
             <h3 class="post-card__title">{{ post.title }}</h3>
+            {% if post.recommendation_reason %}
+            <p class="post-card__reason">{{ post.recommendation_reason }}</p>
+            {% endif %}
           </div>
         </a>
       </article>

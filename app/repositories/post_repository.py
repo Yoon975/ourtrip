@@ -173,18 +173,6 @@ class PostRepository:
             )
         self.db.commit()
 
-    def find_all_for_recommendation(self):
-        with self.db.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT post_id, user_id, title, location_country, location_city,
-                       travel_start_date, travel_end_date, view_count, created_at
-                FROM Posts
-                ORDER BY created_at DESC
-                """
-            )
-            return cursor.fetchall()
-
     def find_images_by_post(self, post_id):
         with self.db.cursor() as cursor:
             cursor.execute(
@@ -357,19 +345,6 @@ class PostRepository:
                 GROUP BY location_country
                 ORDER BY cnt DESC
                 LIMIT 12
-                """
-            )
-            return cursor.fetchall()
-
-    def find_all_for_admin(self):
-        with self.db.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT p.post_id, p.title, p.view_count, p.created_at,
-                       u.user_id, u.nickname
-                FROM Posts p
-                JOIN Users u ON p.user_id = u.user_id
-                ORDER BY p.created_at DESC
                 """
             )
             return cursor.fetchall()

@@ -39,18 +39,6 @@ class NotificationRepository:
             )
             return cursor.fetchall()
 
-    def mark_read(self, user_id, notification_id):
-        with self.db.cursor() as cursor:
-            cursor.execute(
-                """
-                UPDATE Notifications
-                SET is_read = 1
-                WHERE notification_id = %s AND user_id = %s
-                """,
-                (notification_id, user_id),
-            )
-        self.db.commit()
-
     def mark_all_read(self, user_id):
         with self.db.cursor() as cursor:
             cursor.execute(

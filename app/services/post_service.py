@@ -1,6 +1,7 @@
 from app.exceptions import ForbiddenError, NotFoundError
 from app.repositories.comment_repository import CommentRepository
 from app.repositories.post_repository import PostRepository
+from app.repositories.post_view_repository import PostViewRepository
 from app.repositories.scrap_repository import ScrapRepository
 from app.services.comment_service import CommentService
 from app.services.image_service import ImageService
@@ -12,6 +13,7 @@ class PostService:
     def __init__(self, db):
         self.post_repo = PostRepository(db)
         self.scrap_repo = ScrapRepository(db)
+        self.view_repo = PostViewRepository(db)
         self.comment_repo = CommentRepository(db)
         self.comment_service = CommentService(db)
         self.image_service = ImageService()
@@ -56,11 +58,11 @@ class PostService:
 
         return post_id
 
-    def delete_post(self, user_id, post_id, is_admin=False):
+    def delete_post(self, user_id, post_id):
         post = self.post_repo.find_by_id_with_author(post_id)
         if not post:
             raise NotFoundError("게시글을 찾을 수 없습니다.")
-        if not is_admin and post["user_id"] != user_id:
+        if post["user_id"] != user_id:
             raise ForbiddenError("본인 게시글만 삭제할 수 있습니다.")
 
         images = self.post_repo.find_images_by_post(post_id)
@@ -91,19 +93,6 @@ class PostService:
     def list_countries(self):
         return self.post_repo.list_filter_countries()
 
-    def list_user_posts(self, user_id, page=1, per_page=12):
-        posts = self.post_repo.find_paginated_by_user(user_id, page, per_page)
-        total = self.post_repo.count_by_user(user_id)
-        for post in posts:
-            post["image_url"] = media_url(post.get("image_url"))
-        return posts, total
-
-    def list_posts_all(self):
-        posts = self.post_repo.find_all_with_thumbnail()
-        for post in posts:
-            post["image_url"] = media_url(post.get("image_url"))
-        return posts
-
     def get_post_detail(self, post_id, viewer_user_id=None):
         post = self.post_repo.find_by_id_with_author(post_id)
         if not post:
@@ -111,6 +100,8 @@ class PostService:
 
         self.post_repo.increment_view_count(post_id)
         post["view_count"] = (post.get("view_count") or 0) + 1
+        if viewer_user_id and viewer_user_id != post["user_id"]:
+            self.view_repo.record_view(viewer_user_id, post_id)
         post["image_url"] = media_url(post.get("image_url"))
 
         images = self.post_repo.find_images_by_post(post_id)

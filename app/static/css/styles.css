@@ -289,6 +289,13 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.post-card__reason {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin-top: 0.35rem;
+}
+
 .post-card__meta {
   font-size: 0.8rem;
   color: var(--color-text-muted);
@@ -296,6 +303,50 @@ body {
 
 .post-card__dots {
   margin: 0 0.25rem;
+}
+
+.account-settings {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 640px;
+}
+
+.account-panel {
+  margin: 0;
+}
+
+.account-panel__title {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  color: var(--color-blue-dark);
+  margin-bottom: 1rem;
+}
+
+.account-panel__meta,
+.account-panel__warn {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.account-panel--danger {
+  border: 1px solid rgba(180, 60, 60, 0.25);
+}
+
+.account-message {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+}
+
+.account-message--success {
+  background: rgba(61, 122, 94, 0.12);
+  color: var(--color-blue-dark);
+}
+
+.account-message--error {
+  background: rgba(180, 60, 60, 0.12);
+  color: #8b2e2e;
 }
 
 /* CTA panel */

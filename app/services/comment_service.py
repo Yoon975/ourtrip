@@ -47,11 +47,11 @@ class CommentService:
         self.comment_repo.update(comment_id, content)
         return self.comment_repo.get_with_author(comment_id)
 
-    def delete_comment(self, user_id, comment_id, is_admin=False):
+    def delete_comment(self, user_id, comment_id):
         comment = self.comment_repo.find_by_id(comment_id)
         if not comment:
             raise NotFoundError("댓글을 찾을 수 없습니다.")
-        if not is_admin and comment["user_id"] != user_id:
+        if comment["user_id"] != user_id:
             raise ForbiddenError("본인 댓글만 삭제할 수 있습니다.")
         self.comment_repo.delete_by_id(comment_id)
         return {"comment_id": comment_id}
@@ -63,7 +63,6 @@ class CommentService:
         for row in rows:
             row = dict(row)
             row["replies"] = []
-            row["can_edit"] = True
             nodes[row["comment_id"]] = row
 
         for row in nodes.values():

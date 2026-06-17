@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
-from app.exceptions import AppException, DuplicateError, ValidationError
-from app.services.service_factory import get_profile_service
+from app.exceptions import AppException, DuplicateError, ForbiddenError, UnauthorizedError, ValidationError
+from app.services.service_factory import get_auth_service, get_profile_service
 from app.utils.auth_decorators import api_login_required, login_required
+from app.utils.csrf import regenerate_csrf_token
 
 bp = Blueprint("profile", __name__)
 
@@ -68,6 +69,89 @@ def api_update_profile():
         return jsonify({"success": False, "message": exc.message, "errors": exc.errors}), 422
     except DuplicateError as exc:
         return jsonify({"success": False, "message": exc.message}), 409
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
+@bp.route("/profile/account")
+@login_required
+def account_settings():
+    summary = get_auth_service().get_account_summary(session["user_id"])
+    return render_template("account_settings.html", account=summary)
+
+
+@bp.route("/api/account/password", methods=["POST"])
+@api_login_required
+def api_change_password():
+    try:
+        data = request.get_json(silent=True) or {}
+        get_auth_service().change_password(
+            session["user_id"],
+            {
+                "current_password": data.get("current_password", ""),
+                "new_password": data.get("new_password", ""),
+                "confirm_password": data.get("confirm_password", ""),
+            },
+        )
+        regenerate_csrf_token()
+        return jsonify({"success": True, "message": "비밀번호가 변경되었습니다."})
+    except ValidationError as exc:
+        return jsonify({"success": False, "message": exc.message, "errors": exc.errors}), 422
+    except UnauthorizedError as exc:
+        return jsonify({"success": False, "message": exc.message}), 401
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
+@bp.route("/api/account/email", methods=["POST"])
+@api_login_required
+def api_change_email():
+    try:
+        data = request.get_json(silent=True) or {}
+        result = get_auth_service().change_email(
+            session["user_id"],
+            {
+                "new_email": data.get("new_email", ""),
+                "password": data.get("password", ""),
+            },
+        )
+        return jsonify({"success": True, "message": result["message"], "email": result["email"]})
+    except ValidationError as exc:
+        return jsonify({"success": False, "message": exc.message, "errors": exc.errors}), 422
+    except DuplicateError as exc:
+        return jsonify({"success": False, "message": exc.message}), 409
+    except UnauthorizedError as exc:
+        return jsonify({"success": False, "message": exc.message}), 401
+    except AppException as exc:
+        return jsonify({"success": False, "message": exc.message}), exc.status_code
+
+
+@bp.route("/api/account/withdraw", methods=["POST"])
+@api_login_required
+def api_withdraw_account():
+    try:
+        data = request.get_json(silent=True) or {}
+        get_auth_service().withdraw_account(
+            session["user_id"],
+            {
+                "password": data.get("password", ""),
+                "confirm_text": data.get("confirm_text", ""),
+            },
+        )
+        session.clear()
+        return jsonify(
+            {
+                "success": True,
+                "message": "회원 탈퇴가 완료되었습니다.",
+                "redirect": url_for("main.index"),
+            }
+        )
+    except ValidationError as exc:
+        return jsonify({"success": False, "message": exc.message, "errors": exc.errors}), 422
+    except ForbiddenError as exc:
+        return jsonify({"success": False, "message": exc.message}), 403
+    except UnauthorizedError as exc:
+        return jsonify({"success": False, "message": exc.message}), 401
     except AppException as exc:
         return jsonify({"success": False, "message": exc.message}), exc.status_code
 

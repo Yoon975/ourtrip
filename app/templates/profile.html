@@ -189,6 +189,7 @@
     </div>
     <div class="profile-toast__actions">
       <a href="{{ url_for('profile.edit_profile') }}" class="profile-toast__btn">프로필 수정</a>
+      <a href="{{ url_for('profile.account_settings') }}" class="profile-toast__btn profile-toast__btn--ghost">계정 설정</a>
     </div>
   </aside>
   {% elif session.get('user_id') != user.user_id %}

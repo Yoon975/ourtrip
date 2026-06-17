@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}계정 설정 — Our Trip{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <p class="page-hero__label">ACCOUNT</p>
+    <h1 class="page-hero__title">계정 설정<span class="page-hero__num">(1)</span></h1>
+    <p class="page-hero__desc">비밀번호·이메일 변경 및 회원 탈퇴</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container account-settings">
+    <div class="form-paper account-panel">
+      <div class="form-paper__tape" aria-hidden="true"></div>
+      <h2 class="account-panel__title">비밀번호 변경</h2>
+      <form id="passwordForm" class="account-form">
+        <div class="form-row">
+          <label for="current_password">현재 비밀번호</label>
+          <input type="password" id="current_password" name="current_password" required />
+        </div>
+        <div class="form-row">
+          <label for="new_password">새 비밀번호</label>
+          <input type="password" id="new_password" name="new_password" required />
+        </div>
+        <div class="form-row">
+          <label for="confirm_password">새 비밀번호 확인</label>
+          <input type="password" id="confirm_password" name="confirm_password" required />
+        </div>
+        <button type="submit" class="btn btn--primary">비밀번호 변경</button>
+      </form>
+    </div>
+
+    <div class="form-paper account-panel">
+      <div class="form-paper__tape" aria-hidden="true"></div>
+      <h2 class="account-panel__title">이메일 변경</h2>
+      <p class="account-panel__meta">현재: <strong id="currentEmail">{{ account.email }}</strong></p>
+      <form id="emailForm" class="account-form">
+        <div class="form-row">
+          <label for="new_email">새 이메일</label>
+          <input type="email" id="new_email" name="new_email" required />
+        </div>
+        <div class="form-row">
+          <label for="email_password">비밀번호 확인</label>
+          <input type="password" id="email_password" name="password" required />
+        </div>
+        <button type="submit" class="btn btn--primary">이메일 변경</button>
+      </form>
+    </div>
+
+    <div class="form-paper account-panel account-panel--danger">
+      <div class="form-paper__tape" aria-hidden="true"></div>
+      <h2 class="account-panel__title">회원 탈퇴</h2>
+      <p class="account-panel__meta">탈퇴 시 게시글·스크랩·댓글 등 모든 데이터가 삭제됩니다.</p>
+      {% if account.role == 'admin' %}
+      <p class="account-panel__warn">관리자 계정은 탈퇴할 수 없습니다.</p>
+      {% else %}
+      <form id="withdrawForm" class="account-form">
+        <div class="form-row">
+          <label for="withdraw_password">비밀번호</label>
+          <input type="password" id="withdraw_password" name="password" required />
+        </div>
+        <div class="form-row">
+          <label for="confirm_text">확인 입력</label>
+          <input type="text" id="confirm_text" name="confirm_text" placeholder="탈퇴" required />
+        </div>
+        <button type="submit" class="btn btn--outline">회원 탈퇴</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <p id="accountMessage" class="account-message" role="alert" hidden></p>
+    <a href="{{ url_for('profile.view_profile', user_id=account.user_id) }}" class="form-paper__link">← 프로필로 돌아가기</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/account_settings.js') }}"></script>
+{% endblock %}

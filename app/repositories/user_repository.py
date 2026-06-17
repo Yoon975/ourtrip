@@ -17,17 +17,6 @@ class UserRepository:
             cursor.execute("SELECT * FROM Users WHERE user_id = %s", (user_id,))
             return cursor.fetchone()
 
-    def find_all_for_admin(self):
-        with self.db.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT user_id, email, nickname, gender, birth_year, role, created_at
-                FROM Users
-                ORDER BY created_at DESC
-                """
-            )
-            return cursor.fetchall()
-
     def find_paginated_for_admin(self, page=1, per_page=20, role=None, search=None):
         offset = (page - 1) * per_page
         conditions = ["1=1"]
@@ -140,6 +129,27 @@ class UserRepository:
                 (relative_path, user_id),
             )
         self.db.commit()
+
+    def update_password(self, user_id, password_hash):
+        with self.db.cursor() as cursor:
+            cursor.execute(
+                "UPDATE Users SET password = %s WHERE user_id = %s",
+                (password_hash, user_id),
+            )
+        self.db.commit()
+
+    def update_email(self, user_id, email):
+        try:
+            with self.db.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE Users SET email = %s WHERE user_id = %s",
+                    (email, user_id),
+                )
+            self.db.commit()
+        except pymysql.err.IntegrityError as exc:
+            if exc.args[0] == 1062:
+                raise DuplicateError("이미 사용 중인 이메일입니다.") from exc
+            raise
 
     def update_profile(self, user_id, nickname, gender, birth_year, profile_image_url=None, bio=None, profile_role=None):
         try:

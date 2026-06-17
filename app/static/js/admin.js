@@ -86,16 +86,28 @@ async function loadOverview() {
     const trainedAt = metrics.trained_at
       ? new Date(metrics.trained_at).toLocaleString("ko-KR")
       : "—";
+    const hybridLabel = metrics.stage3_enabled
+      ? "3단계 (TF-IDF · 의미 임베딩 · 협업 · 조회 + LTR)"
+      : metrics.hybrid_enabled
+        ? "2단계 (TF-IDF + 협업 필터)"
+        : "—";
+    const countryHit = metrics.stage3_country_hit_at_3 ?? metrics.hybrid_country_hit_at_3;
+    const postHit = metrics.stage3_post_hit_at_3 ?? metrics.hybrid_post_hit_at_3;
+    const weights = metrics.ranking_weights;
+    const weightText = weights
+      ? `RF ${(weights.rf * 100).toFixed(0)}% · 콘텐츠 ${(weights.content * 100).toFixed(0)}% · 의미 ${(weights.semantic * 100).toFixed(0)}% · 협업 ${(weights.collab * 100).toFixed(0)}% · 조회 ${(weights.view * 100).toFixed(0)}%`
+      : null;
     metricsEl.innerHTML = `
-      <p>상태 <strong>${metrics.exists ? "저장됨" : "미생성"}</strong></p>
+      <p>상태 <strong>${metrics.exists ? "저장됨" : "미생성"}</strong>${metrics.model_version ? ` <span class="admin-metrics__note">v${metrics.model_version}</span>` : ""}</p>
       <p>마지막 학습 <strong>${metrics.exists ? trainedAt : "—"}</strong></p>
       <p>학습 샘플 <strong>${metrics.sample_count != null ? metrics.sample_count.toLocaleString() + "건" : "—"}</strong></p>
       <p>Top-1 정확도 <strong>${metrics.top1_accuracy != null ? (metrics.top1_accuracy * 100).toFixed(1) + "%" : "—"}</strong></p>
       <p>Top-3 정확도 <strong>${metrics.top3_accuracy != null ? (metrics.top3_accuracy * 100).toFixed(1) + "%" : "—"}</strong></p>
       <p>피처 수 <strong>${metrics.feature_count != null ? metrics.feature_count + "개 (나이·성별·스크랩·작성·여행)" : "—"}</strong></p>
-      <p>하이브리드 <strong>${metrics.hybrid_enabled ? "TF-IDF + 협업 필터" : "—"}</strong></p>
-      <p>추천 국가 Hit@3 <strong>${metrics.hybrid_country_hit_at_3 != null ? (metrics.hybrid_country_hit_at_3 * 100).toFixed(1) + "%" : "—"}</strong>${metrics.rf_rank_country_hit_at_3 != null ? ` <span class="admin-metrics__note">(RF만 ${(metrics.rf_rank_country_hit_at_3 * 100).toFixed(1)}%)</span>` : ""}</p>
-      <p>추천 게시물 Hit@3 <strong>${metrics.hybrid_post_hit_at_3 != null ? (metrics.hybrid_post_hit_at_3 * 100).toFixed(1) + "%" : "—"}</strong></p>
+      <p>랭킹 엔진 <strong>${hybridLabel}</strong></p>
+      ${weightText ? `<p>LTR 가중치 <strong>${weightText}</strong></p>` : ""}
+      <p>추천 국가 Hit@3 <strong>${countryHit != null ? (countryHit * 100).toFixed(1) + "%" : "—"}</strong>${metrics.rf_rank_country_hit_at_3 != null ? ` <span class="admin-metrics__note">(RF만 ${(metrics.rf_rank_country_hit_at_3 * 100).toFixed(1)}%)</span>` : ""}</p>
+      <p>추천 게시물 Hit@3 <strong>${postHit != null ? (postHit * 100).toFixed(1) + "%" : "—"}</strong></p>
       ${metrics.note ? `<p class="admin-metrics__note">${metrics.note}</p>` : ""}
       ${!metrics.exists ? `<p class="admin-metrics__note">모델 생성 버튼을 눌러 학습·저장하세요. 추천은 저장된 모델을 사용합니다.</p>` : ""}
     `;

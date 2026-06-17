@@ -2,8 +2,6 @@ from functools import wraps
 
 from flask import flash, jsonify, redirect, session, url_for
 
-from app.exceptions import UnauthorizedError
-
 
 def _is_admin():
     return session.get("role") == "admin"

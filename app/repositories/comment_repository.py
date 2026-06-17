@@ -50,20 +50,6 @@ class CommentRepository:
             )
             return cursor.fetchone()
 
-    def find_all_for_admin(self):
-        with self.db.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT c.comment_id, c.content, c.created_at, c.post_id,
-                       p.title AS post_title, u.user_id, u.nickname
-                FROM Comments c
-                JOIN Users u ON c.user_id = u.user_id
-                JOIN Posts p ON c.post_id = p.post_id
-                ORDER BY c.created_at DESC
-                """
-            )
-            return cursor.fetchall()
-
     def find_paginated_for_admin(self, page=1, per_page=20, search=None):
         offset = (page - 1) * per_page
         conditions = ["1=1"]

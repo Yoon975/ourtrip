@@ -7,15 +7,6 @@ from app.exceptions import ValidationError
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-def validate_required_fields(data, fields):
-    errors = {}
-    for field in fields:
-        value = data.get(field)
-        if value is None or str(value).strip() == "":
-            errors[field] = "필수 입력 항목입니다."
-    return errors
-
-
 def validate_email(email):
     email = (email or "").strip()
     if not email:
@@ -149,6 +140,72 @@ def validate_login_payload(data):
         errors["password"] = password_error
     if errors:
         raise ValidationError("로그인 정보를 확인해 주세요.", errors=errors)
+
+
+def validate_password_change_payload(data):
+    errors = {}
+    current_error = validate_password(data.get("current_password"))
+    new_error = validate_password(data.get("new_password"))
+    confirm = data.get("confirm_password") or ""
+    if current_error:
+        errors["current_password"] = current_error
+    if new_error:
+        errors["new_password"] = new_error
+    if not confirm:
+        errors["confirm_password"] = "새 비밀번호 확인을 입력해 주세요."
+    elif data.get("new_password") != confirm:
+        errors["confirm_password"] = "새 비밀번호가 일치하지 않습니다."
+    if data.get("current_password") and data.get("new_password") and data.get("current_password") == data.get("new_password"):
+        errors["new_password"] = "현재 비밀번호와 다른 비밀번호를 입력해 주세요."
+    if errors:
+        raise ValidationError("입력값을 확인해 주세요.", errors=errors)
+
+
+def validate_password_reset_request_payload(data):
+    errors = {}
+    email_error = validate_email(data.get("email"))
+    if email_error:
+        errors["email"] = email_error
+    if errors:
+        raise ValidationError("입력값을 확인해 주세요.", errors=errors)
+
+
+def validate_password_reset_payload(data):
+    errors = {}
+    new_error = validate_password(data.get("new_password"))
+    confirm = data.get("confirm_password") or ""
+    if new_error:
+        errors["new_password"] = new_error
+    if not confirm:
+        errors["confirm_password"] = "새 비밀번호 확인을 입력해 주세요."
+    elif data.get("new_password") != confirm:
+        errors["confirm_password"] = "새 비밀번호가 일치하지 않습니다."
+    if errors:
+        raise ValidationError("입력값을 확인해 주세요.", errors=errors)
+
+
+def validate_email_change_payload(data):
+    errors = {}
+    email_error = validate_email(data.get("new_email"))
+    password_error = validate_password(data.get("password"))
+    if email_error:
+        errors["new_email"] = email_error
+    if password_error:
+        errors["password"] = password_error
+    if errors:
+        raise ValidationError("입력값을 확인해 주세요.", errors=errors)
+
+
+def validate_withdraw_payload(data):
+    errors = {}
+    password_error = validate_password(data.get("password"))
+    confirm_text = (data.get("confirm_text") or "").strip()
+    if password_error:
+        errors["password"] = password_error
+    if confirm_text != "탈퇴":
+        errors["confirm_text"] = "확인을 위해 '탈퇴'를 입력해 주세요."
+    if errors:
+        raise ValidationError("입력값을 확인해 주세요.", errors=errors)
 
 
 def validate_comment_content(content):

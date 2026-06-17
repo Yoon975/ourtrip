@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Our Trip — 함께하는 여행 기록 커뮤니티" />
+    <meta name="csrf-token" content="{{ csrf_token }}" />
     <title>{% block title %}Our Trip{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -76,6 +77,7 @@
     </footer>
     {% endblock %}
 
+    <script src="{{ url_for('static', filename='js/csrf.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>

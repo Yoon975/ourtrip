@@ -133,9 +133,6 @@ class RecommendationPreprocessor:
             "feature_count": len(features.columns),
         }
 
-    def export_posts_to_csv(self, rows):
-        return self.export_training_to_csv(rows, [])
-
     def train_random_forest(self, csv_path=None):
         csv_path = csv_path or Config.RECOMMENDATION_CSV
         df = self._load_training_dataframe(csv_path)

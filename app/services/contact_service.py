@@ -26,20 +26,3 @@ class ContactService:
 
         contact_id = self.repo.create(name, email, message, user_id)
         return {"contact_id": contact_id}
-
-    def list_contacts(self, page=1, search=None):
-        per_page = 20
-        items = self.repo.find_paginated_for_admin(page, per_page, search)
-        total = self.repo.count_for_admin(search)
-        total_pages = max((total + per_page - 1) // per_page, 1)
-        return {
-            "items": items,
-            "page": page,
-            "per_page": per_page,
-            "total": total,
-            "total_pages": total_pages,
-        }
-
-    def delete_contact(self, contact_id):
-        self.repo.delete_by_id(contact_id)
-        return {"contact_id": contact_id}

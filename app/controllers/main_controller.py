@@ -45,6 +45,7 @@ def index():
         recommended=recommendations["posts"],
         recommended_destinations=recommendations["destinations"],
         model_ready=recommendations.get("model_ready", False),
+        stage3_ready=recommendations.get("stage3_ready", False),
     )
 
 
@@ -267,28 +268,3 @@ def list_notifications():
 def read_all_notifications():
     get_notification_service().mark_all_read(session["user_id"])
     return jsonify({"success": True})
-
-
-@bp.route("/api/recommendations")
-def recommendations():
-    user_id = session.get("user_id")
-    items = get_recommendation_service().get_recommendations(user_id=user_id, limit=5)
-    return jsonify(
-        {
-            "success": True,
-            "destinations": items["destinations"],
-            "user_features": items.get("user_features"),
-            "model_ready": items.get("model_ready", False),
-            "items": [
-                {
-                    "post_id": post["post_id"],
-                    "title": post["title"],
-                    "location_country": post.get("location_country"),
-                    "location_city": post.get("location_city"),
-                    "image_url": post.get("image_url"),
-                    "recommendation_score": post.get("recommendation_score"),
-                }
-                for post in items["posts"]
-            ],
-        }
-    )

@@ -401,6 +401,16 @@ body {
   background: #f0f0f0;
 }
 
+.profile-toast__btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff;
+}
+
+.profile-toast__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .profile-toast__close {
   width: 28px;
   height: 28px;

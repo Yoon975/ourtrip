@@ -2,13 +2,6 @@ from flask import url_for
 
 
 class NotificationService:
-    TYPE_LABELS = {
-        "comment": "새 댓글",
-        "reply": "새 답글",
-        "scrap": "스크랩",
-        "message": "새 메시지",
-    }
-
     def __init__(self, db):
         from app.repositories.notification_repository import NotificationRepository
 
@@ -66,17 +59,11 @@ class NotificationService:
             link_url=link,
         )
 
-    def get_summary(self, user_id):
-        return {
-            "unread_count": self.repo.count_unread(user_id),
-            "items": self.repo.find_recent(user_id, limit=10),
-        }
+    def unread_count(self, user_id):
+        return self.repo.count_unread(user_id)
 
     def list_notifications(self, user_id):
         return self.repo.find_recent(user_id, limit=30)
-
-    def mark_read(self, user_id, notification_id):
-        self.repo.mark_read(user_id, notification_id)
 
     def mark_all_read(self, user_id):
         self.repo.mark_all_read(user_id)

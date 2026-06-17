@@ -18,6 +18,7 @@
       enctype="multipart/form-data"
       action="{% if edit_mode %}{{ url_for('main.edit_post', post_id=post.post_id) }}{% else %}{{ url_for('main.write_post') }}{% endif %}"
     >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
       <div class="form-paper__tape" aria-hidden="true"></div>
 
       <div class="form-row">

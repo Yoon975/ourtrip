@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 
 from app.config import Config
 from app.db import close_db
@@ -7,10 +7,21 @@ from app.error_handlers import register_error_handlers
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
     app.secret_key = Config.SECRET_KEY
 
     app.teardown_appcontext(close_db)
     register_error_handlers(app)
+
+    @app.before_request
+    def csrf_guard():
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return
+        if request.endpoint == "static":
+            return
+        from app.utils.csrf import validate_csrf
+
+        validate_csrf()
 
     from app.controllers.auth_controller import bp as auth_bp
     from app.controllers.main_controller import bp as main_bp
@@ -27,6 +38,12 @@ def create_app():
     app.jinja_env.globals["media_url"] = _media_url_global
 
     @app.context_processor
+    def inject_csrf():
+        from app.utils.csrf import get_csrf_token
+
+        return {"csrf_token": get_csrf_token()}
+
+    @app.context_processor
     def inject_nav_counts():
         from flask import session
 
@@ -37,7 +54,7 @@ def create_app():
                 from app.services.service_factory import get_message_service, get_notification_service
 
                 counts["unread_messages"] = get_message_service().unread_count(user_id)
-                counts["unread_notifications"] = get_notification_service().get_summary(user_id)["unread_count"]
+                counts["unread_notifications"] = get_notification_service().unread_count(user_id)
             except Exception:
                 pass
         return counts

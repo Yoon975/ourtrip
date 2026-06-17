@@ -1,6 +1,4 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.sparse import csr_matrix
 import numpy as np
 
 WEIGHT_RF = 0.35
@@ -12,67 +10,7 @@ WEIGHT_COLLAB_COLD = 0.20
 
 
 class HybridRecommender:
-    """TF-IDF 콘텐츠 유사도 + 스크랩 협업 필터링 하이브리드 랭킹."""
-
-    def build_artifacts(self, posts, scrap_pairs):
-        if not posts:
-            return None
-
-        post_ids = [post["post_id"] for post in posts]
-        post_id_to_idx = {post_id: index for index, post_id in enumerate(post_ids)}
-        documents = []
-        for post in posts:
-            city = post.get("location_city") or ""
-            documents.append(
-                " ".join(
-                    [
-                        str(post.get("title") or ""),
-                        str(post.get("content") or ""),
-                        str(post.get("location_country") or ""),
-                        str(city),
-                    ]
-                )
-            )
-
-        vectorizer = TfidfVectorizer(
-            max_features=8000,
-            min_df=1,
-            ngram_range=(1, 2),
-            sublinear_tf=True,
-        )
-        tfidf_matrix = vectorizer.fit_transform(documents)
-
-        user_ids = sorted({pair["user_id"] for pair in scrap_pairs})
-        collab_post_ids = sorted({pair["post_id"] for pair in scrap_pairs})
-        user_to_idx = {user_id: index for index, user_id in enumerate(user_ids)}
-        collab_post_to_idx = {
-            post_id: index for index, post_id in enumerate(collab_post_ids)
-        }
-
-        rows, cols, data = [], [], []
-        for pair in scrap_pairs:
-            user_index = user_to_idx.get(pair["user_id"])
-            post_index = collab_post_to_idx.get(pair["post_id"])
-            if user_index is None or post_index is None:
-                continue
-            rows.append(user_index)
-            cols.append(post_index)
-            data.append(1.0)
-
-        collab_matrix = csr_matrix(
-            (data, (rows, cols)),
-            shape=(len(user_ids), len(collab_post_ids)),
-        )
-
-        return {
-            "vectorizer": vectorizer,
-            "tfidf_matrix": tfidf_matrix,
-            "post_ids": post_ids,
-            "post_id_to_idx": post_id_to_idx,
-            "collab_user_ids": user_ids,
-            "collab_post_ids": collab_post_ids,
-            "collab_matrix": collab_matrix,
-        }
+    """TF-IDF 콘텐츠 유사도 + 스크랩 협업 필터링 하이브리드 랭킹 (v3 번들 fallback)."""
 
     def rank_posts(
         self,
